@@ -67,7 +67,7 @@
       <template #title>
         <div class="flex items-center gap-2">
           <i class="pi pi-pencil text-green-600"></i>
-          社工補充說明
+          其他補充說明（可用語音輸入）
         </div>
       </template>
       <template #content>

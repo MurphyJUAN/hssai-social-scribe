@@ -61,56 +61,56 @@ export const useProjectStore = defineStore('project', () => {
         {
           value: 'legal_related_status',
           name: '個案狀況 - (一)法律相關狀況',
-          icon: 'pi pi-briefcase',
+          icon: 'pi',
           description:
             '是否有訴訟(如民事離婚、保護令、暫時處份、強制執行、刑事案件-家暴、妨害性自主、法律爭議、法院未成年子女相關訴訟(如酌定親權-監護權、會面交往、給付扶養)、是否有犯罪服刑、涉及家庭暴力...等等)'
         },
         {
           value: 'economic_financial_status',
           name: '個案狀況 - (二)經濟或財務狀況',
-          icon: 'pi pi-money-bill',
+          icon: 'pi',
           description:
             '主要收入來源、主要經濟提供者、是否有人身保險、是否負債、個案謀生能力、主要花費負擔'
         },
         {
           value: 'psychological_emotional_status',
           name: '個案狀況 - (三)心理或情緒狀況',
-          icon: 'pi pi-heart',
+          icon: 'pi',
           description:
             '個案或其家人的人格特質、情緒穩定度、訪視的態度、身心狀況、是否有諮商或看精神科（或疾病史）、是否有自我傷害傾向、重大壓力事件'
         },
         {
           value: 'parenting_education_status',
           name: '個案狀況 - (四)教養或教育狀況',
-          icon: 'pi pi-graduation-cap',
+          icon: 'pi',
           description:
             '個案或其家庭的親職能力、親職教養上的困難、孩子接受課後照顧或補習情形、孩子學業成績表現、學校中的師生關係、孩子與同儕的關係或互動、學業壓力'
         },
         {
           value: 'early_intervention_childcare_status',
           name: '個案狀況 - (五)早療或幼兒狀況',
-          icon: 'pi pi-baby',
+          icon: 'pi',
           description:
             '個案與配偶之間的互動頻率、彼此情感支持狀況、家務責任分工、與孩子互動的頻率與深度、是否有隔代教養的問題、孩子與祖父母的情感關係、教養因應問題的策略或技巧'
         },
         {
           value: 'medical_physical_status',
           name: '個案狀況 - (六)醫療或生理狀況',
-          icon: 'pi pi-hospital',
+          icon: 'pi',
           description:
             '個案或其家人的罹病與診治史、對疾病的認識與態度、是否有長期用藥、是否具有身心障礙資格或有重大傷病卡、是否有慢性疾病或有重大疾病，服藥穩定度、對醫療的期待、醫療團隊的評估'
         },
         {
           value: 'support_system_status',
           name: '個案狀況 - (七)支持系統或狀況',
-          icon: 'pi pi-sitemap',
+          icon: 'pi',
           description:
             '支持系統(正式系統、非正式系統)、主要照顧者、是否有委任律師、資源使用的能力、經常請教討論的對象、這些支持系統或支持者所提供的訊息或協助'
         },
         {
           value: 'cultural_traditional_status',
           name: '個案狀況 - (八)文化與傳統狀況',
-          icon: 'pi pi-globe',
+          icon: 'pi',
           description:
             '國籍(若非台灣國籍)、民族(若非漢族)、宗教信仰背景、與台灣主流文化不同的生活習慣、生活價值觀、生活適應問題、語言溝通問題、與遠地或國外家人的關係'
         }
