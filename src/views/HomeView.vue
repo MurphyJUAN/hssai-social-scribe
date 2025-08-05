@@ -1,87 +1,185 @@
+<!-- File: views/HomeVuew.vue -->
 <template>
-  <div class="font-sans bg-white transition-all duration-1000 ease-in-out">
-    <BannerUpload :scrollTarget="dashboardRef" />
-    <div
-      ref="dashboardRef"
-      class="flex w-full transition-all duration-1000 ease-in-out py-6 px-8"
-      v-if="sessionStore.hasUploaded"
-    >
-      <DashboardPanel>
-        <template #project-header>
-          <div class="flex">
-            <ConfirmPopup />
-            <button
-              class="md:w-[10%] mr-4 text-deepPurple font-semibold hover:text-deepBlue"
-              @click="onClickCancel($event)"
-            >
-              取消
-            </button>
-            <div class="md:w-[90%] flex justify-center items-center">
-              <p class="font-semibold text-lg">編輯區</p>
-            </div>
-            <button
-              class="md:w-[10%] mr-4 text-deepPurple font-semibold hover:text-deepBlue"
-              @click="onClickSave"
-            >
-              儲存
-            </button>
+  <div class="min-h-screen bg-gray-50">
+    
+    <!-- 主要內容區域 -->
+    <main class="relative">
+      <!-- Banner Upload 區域 -->
+      <BannerUpload 
+        @audio-uploaded="handleAudioUpload"
+        @transcript-uploaded="handleTranscriptUpload"
+        @recording-completed="handleRecordingCompleted"
+      />
+      
+      <!-- Dashboard 區域 (當 hasUploaded 為 true 時顯示) -->
+      <div 
+        v-if="hasUploaded" 
+        class="container mx-auto px-4 py-8"
+        :class="{ 'pt-0': hasUploaded }"
+      >
+        <!-- 專案控制列 -->
+        <div class="flex justify-between items-center mb-6 bg-white rounded-lg shadow-sm p-4">
+          <div class="flex items-center gap-4">
+            <h2 class="text-xl font-semibold text-gray-800">
+              {{ projectName || '新專案' }}
+            </h2>
+            <Badge 
+              :value="currentStepLabel" 
+              severity="info" 
+              class="text-sm"
+            />
           </div>
-        </template>
-
-        <template #transcript-tab>
-          <!-- 逐字稿的內容 -->
-          <div class="">
-            <!-- <textarea row="100" class="h-full block rounded-lg m-0 px-4 py-2  w-full text-gray-900 bg-transparent  border outline-none" v-model="projectStore.tempTranscript"></textarea> -->
-            <PlayerPanel v-if="sessionStore.audioFile" :file="sessionStore.audioFile" />
-            <TranscriptEditor />
+          
+          <div class="flex gap-3">
+            <Button 
+              label="儲存專案" 
+              icon="pi pi-save" 
+              @click="handleSaveProject"
+              outlined
+              size="small"
+            />
+            <Button 
+              label="取消專案" 
+              icon="pi pi-times" 
+              @click="handleCancelProject"
+              severity="secondary"
+              outlined
+              size="small"
+            />
           </div>
-        </template>
-        <template #ai-doc-tab>
-          <!-- AI 智能文件的內容 -->
-          <div class="">
-            <ReportEditor />
-          </div>
-        </template>
-      </DashboardPanel>
-    </div>
+        </div>
+        
+        <!-- Dashboard Panel -->
+        <DashboardPanel>
+          <!-- 逐字稿 Tab -->
+          <template #transcript-tab>
+            <TranscriptPanel />
+          </template>
+          
+          <!-- 記錄設定 Tab -->
+          <template #report-config-tab>
+            <ReportConfigPanel />
+          </template>
+          
+          <!-- 記錄初稿 Tab -->
+          <template #ai-doc-tab>
+            <ReportDraftPanel />
+          </template>
+          
+          <!-- 處遇計畫設定 Tab -->
+          <template #treatment-plan-tab>
+            <TreatmentPlanPanel />
+          </template>
+        </DashboardPanel>
+      </div>
+    </main>
+    
+    <!-- 確認對話框 -->
+    <ConfirmDialog />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import BannerUpload from '../components/Banner/BannerUpload.vue'
-import TranscriptEditor from '../components/TypescriptEditor/TypescriptEditor.vue'
-import ReportEditor from '../components/ReportSession/ReportEditor.vue'
-import DashboardPanel from '@/components/Dashboard/DashboardPanel.vue'
-import PlayerPanel from '@/components/Player/PlayerPanel.vue'
-import { useSessionStore } from '@/stores/useSessionStore'
+import { ref, computed, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useProjectStore } from '@/stores/useProjectStore'
 import { useConfirm } from 'primevue/useconfirm'
-import ConfirmPopup from 'primevue/confirmpopup'
-import { useToast } from 'primevue/usetoast'
-const sessionStore = useSessionStore()
-const dashboardRef = ref<HTMLElement | null>(null)
-const confirm = useConfirm()
-const toast = useToast()
-const onClickSave = () => {
-  toast.add({
-    severity: 'success',
-    summary: '已儲存',
-    detail: '您的內容已成功儲存',
-    life: 3000 // 幾毫秒後消失（這裡是 3 秒）
-  })
+import type { StepType } from '@/types'
+
+// Components
+import BannerUpload from '@/components/Banner/BannerUpload.vue'
+import DashboardPanel from '@/components/Dashboard/DashboardPanel.vue'
+import TranscriptPanel from '@/components/Dashboard/TranscriptPanel.vue'
+import ReportConfigPanel from '@/components/Dashboard/ReportConfigPanel.vue'
+import ReportDraftPanel from '@/components/Dashboard/ReportDraftPanel.vue'
+import TreatmentPlanPanel from '@/components/Dashboard/TreatmentPlanPanel.vue'
+
+// PrimeVue
+import Button from 'primevue/button'
+import Badge from 'primevue/badge'
+import ConfirmDialog from 'primevue/confirmdialog'
+
+// Interfaces
+interface AudioUploadData {
+  file: File
+  url: string
 }
 
-const onClickCancel = (event: Event) => {
+interface TranscriptUploadData {
+  content: string
+}
+
+interface RecordingData {
+  file: File
+  url: string
+}
+
+const projectStore = useProjectStore()
+const { 
+  hasUploaded, 
+  currentStep, 
+  projectName 
+} = storeToRefs(projectStore)
+
+const confirm = useConfirm()
+
+// Computed
+const currentStepLabel = computed(() => {
+  const stepLabels: Record<StepType, string> = {
+    transcript: '逐字稿階段',
+    config: '記錄設定階段',
+    draft: '記錄初稿階段',
+    treatment: '處遇計畫階段'
+  }
+  return stepLabels[currentStep.value] || '準備階段'
+})
+
+// Methods
+const handleAudioUpload = (audioData: AudioUploadData) => {
+  projectStore.setAudioFile(audioData.file, audioData.url)
+  projectStore.setCurrentStep('transcript')
+}
+
+const handleTranscriptUpload = (transcriptData: TranscriptUploadData) => {
+  projectStore.setTranscript(transcriptData.content)
+  projectStore.setCurrentStep('transcript')
+}
+
+const handleRecordingCompleted = (recordingData: RecordingData) => {
+  projectStore.setAudioFile(recordingData.file, recordingData.url)
+  projectStore.setCurrentStep('transcript')
+}
+
+const handleSaveProject = () => {
+  try {
+    projectStore.saveProject()
+    // 可以加入成功提示
+    console.log('專案已儲存')
+  } catch (error) {
+    console.error('儲存專案失敗:', error)
+  }
+}
+
+const handleCancelProject = () => {
   confirm.require({
-    target: event.currentTarget as HTMLElement,
-    message: '你確定要清除內容嗎？重新整理後網頁將不會保留目前生成的逐字稿與報告',
+    message: '確定要取消當前專案嗎？所有未儲存的資料將會遺失。',
+    header: '確認取消專案',
     icon: 'pi pi-exclamation-triangle',
-    acceptLabel: '確認',
-    rejectLabel: '取消',
     acceptClass: 'p-button-danger',
+    acceptLabel: '確認取消',
+    rejectLabel: '繼續編輯',
     accept: () => {
-      sessionStore.reset()
+      projectStore.resetProject()
     }
   })
 }
+
+// Lifecycle
+onMounted(() => {
+  // 檢查是否有進行中的專案
+  const currentProjectId = localStorage.getItem('social_work_current_project')
+  if (currentProjectId) {
+    projectStore.loadProject(currentProjectId)
+  }
+})
 </script>

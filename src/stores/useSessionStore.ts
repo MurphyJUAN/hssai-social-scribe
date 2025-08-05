@@ -1,68 +1,110 @@
+// stores/useSessionStore.ts
 import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import type { StepType } from '@/types'
 
-export const useSessionStore = defineStore('session', {
-  state: () => ({
-    audioFile: null as File | null,
-    transcriptFile: null as File | null,
-    transcriptText: '',
-    reportText: '',
-    hasSubmitted: false,
-    transcriptStage: 'idle' as 'idle' | 'transcribing' | 'correcting' | 'done',
-    reportStage: 'idle' as 'idle' | 'generating' | 'done',
-    activeTabIndex: 0,
-    selectedTemplate: ''
-  }),
-  getters: {
-    hasUploaded: (state) => {
-      return (
-        !!state.audioFile || !!state.transcriptFile || !!state.transcriptText || !!state.reportText
-      )
+interface TabInfo {
+  index: number
+  key: StepType
+  label: string
+  icon: string
+  enabled: boolean
+}
+
+export const useSessionStore = defineStore('session', () => {
+  // ==================== Tab 導航狀態 ====================
+  const activeTabIndex = ref<number>(0)
+  const reportStage = ref<'idle' | 'config' | 'generating' | 'completed'>('idle')
+  
+  // Tab 定義
+  const tabs = ref<TabInfo[]>([
+    { 
+      index: 0, 
+      key: 'transcript', 
+      label: '逐字稿', 
+      icon: 'pi pi-file-text',
+      enabled: true 
     },
-    hasTypescript: (state) => !!state.transcriptText,
-    hasReport: (state) => !!state.reportText
-  },
-  actions: {
-    setSelectedTemplate(template: string) {
-      this.selectedTemplate = template
+    { 
+      index: 1, 
+      key: 'config', 
+      label: '記錄設定', 
+      icon: 'pi pi-cog',
+      enabled: true
     },
-    setActiveTab(index: number) {
-      this.activeTabIndex = index
+    { 
+      index: 2, 
+      key: 'draft', 
+      label: '記錄初稿', 
+      icon: 'pi pi-file-edit',
+      enabled: true
     },
-    setTranscriptStage(stage: 'idle' | 'transcribing' | 'correcting' | 'done') {
-      this.transcriptStage = stage
-    },
-    setReportStage(stage: 'idle' | 'generating' | 'done') {
-      this.reportStage = stage
-    },
-    setAudioFile(file: File) {
-      this.audioFile = file
-    },
-    setTranscriptFile(file: File) {
-      this.transcriptFile = file
-    },
-    setTranscriptText(text: string) {
-      this.transcriptText = text
-    },
-    setReportText(text: string) {
-      this.reportText = text
-    },
-    markSubmitted() {
-      this.hasSubmitted = true
-    },
-    reset() {
-      this.audioFile = null
-      this.transcriptFile = null
-      this.transcriptText = ''
-      this.reportText = ''
-      this.reportStage = 'idle'
-      this.transcriptStage = 'idle'
-      this.activeTabIndex = 0
-      this.selectedTemplate = ''
-      localStorage.removeItem('pinia')
+    { 
+      index: 3, 
+      key: 'treatment', 
+      label: '處遇計畫設定', 
+      icon: 'pi pi-target',
+      enabled: true
     }
-  },
-  persist: {
-    storage: localStorage,
-    paths: ['transcriptText', 'reportText', 'selectedTemplate', 'activeTabIndex']
+  ])
+  
+  // ==================== 導航方法 ====================
+  const setActiveTab = (index: number): void => {
+    activeTabIndex.value = index
+  }
+  
+  const setReportStage = (stage: 'idle' | 'config' | 'generating' | 'completed'): void => {
+    reportStage.value = stage
+  }
+  
+  const nextTab = (): void => {
+    if (activeTabIndex.value < tabs.value.length - 1) {
+      activeTabIndex.value++
+    }
+  }
+  
+  const prevTab = (): void => {
+    if (activeTabIndex.value > 0) {
+      activeTabIndex.value--
+    }
+  }
+  
+  const goToTab = (tabKey: StepType): void => {
+    const tab = tabs.value.find(t => t.key === tabKey)
+    if (tab) {
+      activeTabIndex.value = tab.index
+    }
+  }
+  
+  // ==================== Computed ====================
+  const currentTab = computed((): TabInfo | undefined => {
+    return tabs.value[activeTabIndex.value]
+  })
+  
+  const canGoNext = computed((): boolean => {
+    return activeTabIndex.value < tabs.value.length - 1
+  })
+  
+  const canGoPrev = computed((): boolean => {
+    return activeTabIndex.value > 0
+  })
+  
+  return {
+    // State
+    activeTabIndex,
+    reportStage,
+    tabs,
+    
+    // Computed
+    currentTab,
+    canGoNext,
+    canGoPrev,
+    
+    // Actions
+    setActiveTab,
+    setReportStage,
+    nextTab,
+    prevTab,
+    goToTab
   }
 })
