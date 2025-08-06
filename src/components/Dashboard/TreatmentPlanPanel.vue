@@ -120,17 +120,13 @@ const projectStore = useProjectStore()
 const { generateTreatmentPlan: generateTreatmentPlanAPI } = useApiIntegration()
 const { downloadTreatmentPlan: downloadTreatmentPlanFile } = useDownload()
 
-const { treatmentConfig, treatmentPlan, treatmentStatus, treatmentProgress } =
+const { reportDraft, treatmentConfig, treatmentPlan, treatmentStatus, treatmentProgress } =
   storeToRefs(projectStore)
 
 // 在組件中安全地計算 treatmentValidation，避免 undefined 錯誤
 const treatmentValidation = computed(() => {
-  if (!treatmentConfig.value || !Array.isArray(treatmentConfig.value.selectedServiceDomains)) {
-    return { isValid: false, message: '載入中...' }
-  }
-
-  if (treatmentConfig.value.selectedServiceDomains.length === 0) {
-    return { isValid: false, message: '請至少選擇一個社工服務領域' }
+  if (!reportDraft.value.length) {
+    return { isValid: false, message: '生成「記錄初稿」後，才可生成「處遇計畫」' }
   }
   return { isValid: true, message: '設定完成，可以生成處遇計畫' }
 })

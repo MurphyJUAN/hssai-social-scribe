@@ -1,46 +1,37 @@
 <!-- File: views/HomeVuew.vue -->
 <template>
   <div class="min-h-screen bg-gray-50">
-    
     <!-- 主要內容區域 -->
     <main class="relative">
       <!-- Banner Upload 區域 -->
-      <BannerUpload 
+      <BannerUpload
         @audio-uploaded="handleAudioUpload"
         @transcript-uploaded="handleTranscriptUpload"
         @recording-completed="handleRecordingCompleted"
       />
-      
+
       <!-- Dashboard 區域 (當 hasUploaded 為 true 時顯示) -->
-      <div 
-        v-if="hasUploaded" 
-        class="container mx-auto px-4 py-8"
-        :class="{ 'pt-0': hasUploaded }"
-      >
+      <div v-if="hasUploaded" class="container mx-auto px-4 py-8" :class="{ 'pt-0': hasUploaded }">
         <!-- 專案控制列 -->
         <div class="flex justify-between items-center mb-6 bg-white rounded-lg shadow-sm p-4">
           <div class="flex items-center gap-4">
             <h2 class="text-xl font-semibold text-gray-800">
               {{ projectName || '新專案' }}
             </h2>
-            <Badge 
-              :value="currentStepLabel" 
-              severity="info" 
-              class="text-sm"
-            />
+            <Badge :value="currentStepLabel" severity="info" class="text-sm" />
           </div>
-          
+
           <div class="flex gap-3">
-            <Button 
-              label="儲存專案" 
-              icon="pi pi-save" 
+            <Button
+              label="儲存專案"
+              icon="pi pi-save"
               @click="handleSaveProject"
               outlined
               size="small"
             />
-            <Button 
-              label="取消專案" 
-              icon="pi pi-times" 
+            <Button
+              label="取消專案"
+              icon="pi pi-times"
               @click="handleCancelProject"
               severity="secondary"
               outlined
@@ -48,24 +39,24 @@
             />
           </div>
         </div>
-        
+
         <!-- Dashboard Panel -->
         <DashboardPanel>
           <!-- 逐字稿 Tab -->
           <template #transcript-tab>
             <TranscriptPanel />
           </template>
-          
+
           <!-- 記錄設定 Tab -->
           <template #report-config-tab>
             <ReportConfigPanel />
           </template>
-          
+
           <!-- 記錄初稿 Tab -->
           <template #ai-doc-tab>
             <ReportDraftPanel />
           </template>
-          
+
           <!-- 處遇計畫設定 Tab -->
           <template #treatment-plan-tab>
             <TreatmentPlanPanel />
@@ -73,7 +64,7 @@
         </DashboardPanel>
       </div>
     </main>
-    
+
     <!-- 確認對話框 -->
     <ConfirmDialog />
   </div>
@@ -83,6 +74,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useProjectStore } from '@/stores/useProjectStore'
+import { useSessionStore } from '@/stores/useSessionStore'
 import { useConfirm } from 'primevue/useconfirm'
 import type { StepType } from '@/types'
 
@@ -115,11 +107,8 @@ interface RecordingData {
 }
 
 const projectStore = useProjectStore()
-const { 
-  hasUploaded, 
-  currentStep, 
-  projectName 
-} = storeToRefs(projectStore)
+const sessionStore = useSessionStore()
+const { hasUploaded, currentStep, projectName } = storeToRefs(projectStore)
 
 const confirm = useConfirm()
 
@@ -170,6 +159,7 @@ const handleCancelProject = () => {
     rejectLabel: '繼續編輯',
     accept: () => {
       projectStore.resetProject()
+      sessionStore.resetTab()
     }
   })
 }

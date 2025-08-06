@@ -15,96 +15,101 @@ export const useSessionStore = defineStore('session', () => {
   // ==================== Tab 導航狀態 ====================
   const activeTabIndex = ref<number>(0)
   const reportStage = ref<'idle' | 'config' | 'generating' | 'completed'>('idle')
-  
+
   // Tab 定義
   const tabs = ref<TabInfo[]>([
-    { 
-      index: 0, 
-      key: 'transcript', 
-      label: '逐字稿', 
+    {
+      index: 0,
+      key: 'transcript',
+      label: '逐字稿',
       icon: 'pi pi-file-text',
-      enabled: true 
+      enabled: true
     },
-    { 
-      index: 1, 
-      key: 'config', 
-      label: '記錄設定', 
+    {
+      index: 1,
+      key: 'config',
+      label: '記錄設定',
       icon: 'pi pi-cog',
       enabled: true
     },
-    { 
-      index: 2, 
-      key: 'draft', 
-      label: '記錄初稿', 
+    {
+      index: 2,
+      key: 'draft',
+      label: '記錄初稿',
       icon: 'pi pi-file-edit',
       enabled: true
     },
-    { 
-      index: 3, 
-      key: 'treatment', 
-      label: '處遇計畫設定', 
+    {
+      index: 3,
+      key: 'treatment',
+      label: '處遇計畫設定',
       icon: 'pi pi-target',
       enabled: true
     }
   ])
-  
+
   // ==================== 導航方法 ====================
   const setActiveTab = (index: number): void => {
     activeTabIndex.value = index
   }
-  
+
   const setReportStage = (stage: 'idle' | 'config' | 'generating' | 'completed'): void => {
     reportStage.value = stage
   }
-  
+
   const nextTab = (): void => {
     if (activeTabIndex.value < tabs.value.length - 1) {
       activeTabIndex.value++
     }
   }
-  
+
   const prevTab = (): void => {
     if (activeTabIndex.value > 0) {
       activeTabIndex.value--
     }
   }
-  
+
   const goToTab = (tabKey: StepType): void => {
-    const tab = tabs.value.find(t => t.key === tabKey)
+    const tab = tabs.value.find((t) => t.key === tabKey)
     if (tab) {
       activeTabIndex.value = tab.index
     }
   }
-  
+
+  const resetTab = (): void => {
+    activeTabIndex.value = 0
+  }
+
   // ==================== Computed ====================
   const currentTab = computed((): TabInfo | undefined => {
     return tabs.value[activeTabIndex.value]
   })
-  
+
   const canGoNext = computed((): boolean => {
     return activeTabIndex.value < tabs.value.length - 1
   })
-  
+
   const canGoPrev = computed((): boolean => {
     return activeTabIndex.value > 0
   })
-  
+
   return {
     // State
     activeTabIndex,
     reportStage,
     tabs,
-    
+
     // Computed
     currentTab,
     canGoNext,
     canGoPrev,
-    
+
     // Actions
     setActiveTab,
     setReportStage,
     nextTab,
     prevTab,
-    goToTab
+    goToTab,
+    resetTab
   }
 })

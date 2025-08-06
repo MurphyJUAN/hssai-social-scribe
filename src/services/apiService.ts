@@ -1,13 +1,16 @@
 // services/apiService.ts
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5353'
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5174'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 interface SSEData {
   type: 'progress' | 'chunk' | 'complete' | 'error'
   progress?: number
+  message?: string
   text?: string
   error?: string
+  timestamp?: number
 }
 
 interface ReportGenerationData {
@@ -56,20 +59,33 @@ export const apiService = {
   // ==================== 音檔轉逐字稿 ====================
   async transcribeAudio(
     audioFile: File,
-    onProgress?: (progress: number, partialTranscript?: string) => void
+    onProgress?: (progress: number, message?: string) => void,
+    onChunk?: (chunk: string) => void
   ): Promise<string> {
     const formData = new FormData()
     formData.append('audio', audioFile)
 
+    console.log('🚀 開始音頻轉換，文件大小:', (audioFile.size / 1024 / 1024).toFixed(2), 'MB')
+
     return new Promise((resolve, reject) => {
       fetch(`${API_BASE_URL}/api/transcribe`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+          // 不要設置 Content-Type，讓瀏覽器自動設置
+          Accept: 'text/event-stream'
+        }
       })
         .then((response) => {
+          console.log('📡 收到響應:', response.status, response.statusText)
+
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`)
           }
+
+          // 檢查 Content-Type
+          const contentType = response.headers.get('content-type')
+          console.log('📄 Content-Type:', contentType)
 
           const reader = response.body?.getReader()
           if (!reader) {
@@ -78,50 +94,86 @@ export const apiService = {
 
           const decoder = new TextDecoder()
           let transcript = ''
+          let buffer = '' // 添加緩衝區處理不完整的數據
 
           function readStream(): void {
             reader
               .read()
               .then(({ done, value }) => {
                 if (done) {
+                  console.log('✅ 串流完成，最終文字長度:', transcript.length)
                   resolve(transcript)
                   return
                 }
 
+                // 解碼新數據並添加到緩衝區
                 const chunk = decoder.decode(value, { stream: true })
-                const lines = chunk.split('\n')
+                buffer += chunk
+
+                // 按行分割處理
+                const lines = buffer.split('\n')
+                // 保留最後一個可能不完整的行
+                buffer = lines.pop() || ''
 
                 for (const line of lines) {
+                  if (line.trim() === '') continue // 跳過空行
+
                   if (line.startsWith('data: ')) {
                     try {
-                      const data: SSEData = JSON.parse(line.slice(6))
+                      const jsonStr = line.slice(6).trim()
+                      if (jsonStr === '') continue // 跳過空數據
 
-                      if (data.type === 'progress') {
-                        onProgress?.(data.progress || 0)
-                      } else if (data.type === 'chunk') {
-                        transcript += data.text || ''
-                        onProgress?.(data.progress || 0, transcript)
-                      } else if (data.type === 'complete') {
-                        resolve(transcript)
-                        return
-                      } else if (data.type === 'error') {
-                        reject(new Error(data.error || '轉換失敗'))
-                        return
+                      const data: SSEData = JSON.parse(jsonStr)
+                      console.log('📨 收到 SSE 數據:', data.type, data.progress || 0, '%')
+
+                      switch (data.type) {
+                        case 'progress':
+                          onProgress?.(data.progress || 0, data.message)
+                          break
+
+                        case 'chunk':
+                          const text = data.text || ''
+                          if (text) {
+                            transcript += text
+                            console.log('📝 收到文字片段:', text.substring(0, 50) + '...')
+                            onChunk?.(text) // 調用新的 onChunk 回調
+                            onProgress?.(data.progress || 0, `接收中... ${transcript.length} 字`)
+                          }
+                          break
+
+                        case 'complete':
+                          console.log('🎉 轉換完成!')
+                          onProgress?.(100, '轉換完成')
+                          resolve(transcript)
+                          return
+
+                        case 'error':
+                          console.error('❌ 轉換錯誤:', data.error)
+                          reject(new Error(data.error || '轉換失敗'))
+                          return
                       }
-                    } catch (e) {
-                      console.warn('Failed to parse SSE data:', line)
+                    } catch (parseError) {
+                      console.warn('⚠️ 解析 SSE 數據失敗:', line, parseError)
                     }
+                  } else if (line.trim()) {
+                    console.log('📋 非 SSE 數據:', line)
                   }
                 }
 
                 readStream()
               })
-              .catch(reject)
+              .catch((streamError) => {
+                console.error('❌ 串流讀取錯誤:', streamError)
+                reject(streamError)
+              })
           }
 
           readStream()
         })
-        .catch(reject)
+        .catch((fetchError) => {
+          console.error('❌ 請求錯誤:', fetchError)
+          reject(fetchError)
+        })
     })
   },
 
@@ -152,6 +204,9 @@ export const apiService = {
           let reportContent = ''
 
           function readStream(): void {
+            if (!reader) {
+              throw new Error('reader 尚未初始化')
+            }
             reader
               .read()
               .then(({ done, value }) => {
@@ -224,6 +279,9 @@ export const apiService = {
           let planContent = ''
 
           function readStream(): void {
+            if (!reader) {
+              throw new Error('reader 尚未初始化')
+            }
             reader
               .read()
               .then(({ done, value }) => {

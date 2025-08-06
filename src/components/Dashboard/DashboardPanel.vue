@@ -9,7 +9,7 @@
       v-model:activeIndex="activeTabIndex"
       :pt="{
         tabpanel: {
-          headerAction: ({ parent, context }) => ({
+          headerAction: ({ parent, context }: any) => ({
             class: [
               'relative font-bold flex items-center p-5 -mb-[2px] border-b-2 rounded-t-md',
               'transition-all duration-200',

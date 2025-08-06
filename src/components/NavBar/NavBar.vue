@@ -6,19 +6,23 @@ import NavLink from '@/components/NavBar/NavLink.vue'
 const navbarLinks = [
   {
     to: '/',
-    name: '首頁'
+    name: '首頁',
+    children: []
   },
   {
     to: '/userGuide',
-    name: '使用說明'
+    name: '使用說明',
+    children: []
   },
   {
     to: '/securityGuide',
-    name: '隱私性說明'
+    name: '隱私性說明',
+    children: []
   },
   {
     to: '/devTeam',
-    name: '開發團隊'
+    name: '開發團隊',
+    children: []
   }
 ]
 

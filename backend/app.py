@@ -587,7 +587,7 @@ if __name__ == '__main__':
     # 啟動應用
     app.run(
         host='0.0.0.0',
-        port=5353,
+        port=5174,
         debug=True,
         threaded=True
     )

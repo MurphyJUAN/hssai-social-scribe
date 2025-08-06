@@ -132,13 +132,11 @@ import { useFileUpload } from '@/composables/useFileUpload'
 import bgUrl from '@/assets/banner-background-img.png'
 
 // Emit events
-interface Emits {
-  audioUploaded: [data: { file: File; url: string }]
-  transcriptUploaded: [data: { content: string }]
-  recordingCompleted: [data: { file: File; url: string }]
-}
-
-const emit = defineEmits<Emits>()
+const emit = defineEmits<{
+  (event: 'audioUploaded', data: { file: File; url: string }): void
+  (event: 'transcriptUploaded', data: { content: string }): void
+  (event: 'recordingCompleted', data: { file: File; url: string }): void
+}>()
 
 // Store and composables
 const store = useProjectStore()

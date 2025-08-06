@@ -177,6 +177,20 @@ const progress = computed(() => {
 })
 
 // Methods
+
+// 更新音量
+const updateVolume = () => {
+  if (audioElement.value) {
+    // 將百分比轉換為 0-1 的範圍
+    audioElement.value.volume = volume.value / 100
+
+    // 可選：保存音量設定到 localStorage
+    localStorage.setItem('audio-player-volume', volume.value.toString())
+
+    console.log(`音量已調整為: ${volume.value}%`)
+  }
+}
+
 const formatTime = (time: number): string => {
   if (!isFinite(time) || isNaN(time) || time < 0) return '00:00'
   const minutes = Math.floor(time / 60)

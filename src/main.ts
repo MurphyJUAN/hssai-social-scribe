@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
-import piniaPersistedstate from 'pinia-plugin-persistedstate'
 import { createPinia } from 'pinia'
+import { createPersistedState } from 'pinia-plugin-persistedstate'
 
 import App from './App.vue'
 import router from './router'
@@ -13,7 +13,12 @@ import 'primeicons/primeicons.css'
 import './style.css'
 
 const pinia = createPinia()
-pinia.use(piniaPersistedstate)
+pinia.use(
+  createPersistedState({
+    storage: localStorage,
+    debug: true // 開發環境可以開啟
+  })
+)
 
 const app = createApp(App)
 app.use(pinia)
