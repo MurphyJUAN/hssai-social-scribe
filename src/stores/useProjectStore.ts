@@ -157,15 +157,22 @@ export const useProjectStore = defineStore('project', () => {
   })
 
   const configValidation = computed(() => {
-    if (totalSelectedSections.value === 0) {
-      return { isValid: false, message: '請至少選擇一個記錄段落' }
+    if (!transcript.value.length) {
+      return { isValid: false, message: '產生/上傳逐字稿後，才可生成訪視記錄初稿' }
     }
     return { isValid: true, message: '設定完成，可以生成記錄' }
   })
 
+  // const treatmentValidation = computed(() => {
+  //   if (treatmentConfig.value.selectedServiceDomains.length === 0) {
+  //     return { isValid: false, message: '請至少選擇一個社工服務領域' }
+  //   }
+  //   return { isValid: true, message: '設定完成，可以生成處遇計畫' }
+  // })
+
   const treatmentValidation = computed(() => {
-    if (treatmentConfig.value.selectedServiceDomains.length === 0) {
-      return { isValid: false, message: '請至少選擇一個社工服務領域' }
+    if (!reportDraft.value.length) {
+      return { isValid: false, message: '生成「記錄初稿」後，才可生成「處遇計畫」' }
     }
     return { isValid: true, message: '設定完成，可以生成處遇計畫' }
   })
@@ -193,7 +200,7 @@ export const useProjectStore = defineStore('project', () => {
   // 設置轉換狀態
   const setTranscriptStatus = (status: StatusType, progress: number = 0) => {
     transcriptStatus.value = status
-    transcriptProgress.value = progress
+    transcriptProgress.value = Math.round(progress)
   }
 
   // 更新記錄設定

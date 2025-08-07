@@ -21,10 +21,8 @@ interface ReportGenerationData {
 }
 
 interface TreatmentGenerationData {
-  transcript: string
   reportDraft: string
   selectedServiceDomains: string[]
-  socialWorkerNotes: string
 }
 
 const apiClient = axios.create({
@@ -68,7 +66,7 @@ export const apiService = {
     console.log('🚀 開始音頻轉換，文件大小:', (audioFile.size / 1024 / 1024).toFixed(2), 'MB')
 
     return new Promise((resolve, reject) => {
-      fetch(`${API_BASE_URL}/api/transcribe`, {
+      fetch(`${API_BASE_URL}/backend/transcribe`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -183,7 +181,7 @@ export const apiService = {
     onProgress?: (progress: number, partialReport?: string) => void
   ): Promise<string> {
     return new Promise((resolve, reject) => {
-      fetch(`${API_BASE_URL}/api/generate-report`, {
+      fetch(`${API_BASE_URL}/backend/generate-report`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -258,7 +256,7 @@ export const apiService = {
     onProgress?: (progress: number, partialPlan?: string) => void
   ): Promise<string> {
     return new Promise((resolve, reject) => {
-      fetch(`${API_BASE_URL}/api/generate-treatment-plan`, {
+      fetch(`${API_BASE_URL}/backend/generate-treatment-plan`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

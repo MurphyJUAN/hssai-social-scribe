@@ -92,10 +92,8 @@ export function useApiIntegration() {
       projectStore.clearTreatmentPlan()
 
       const treatmentData = {
-        transcript: projectStore.transcript,
         reportDraft: projectStore.reportDraft,
-        selectedServiceDomains: projectStore.treatmentConfig.selectedServiceDomains,
-        socialWorkerNotes: projectStore.socialWorkerNotes || ''
+        selectedServiceDomains: projectStore.treatmentConfig.selectedServiceDomains
       }
 
       const plan = await apiService.generateTreatmentPlan(

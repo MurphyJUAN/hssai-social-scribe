@@ -9,9 +9,22 @@ export function useRecording() {
   const audioChunks = ref<Blob[]>([])
   const stream = ref<MediaStream | null>(null)
 
+  // 🔑 新增：最大錄音時間（90分鐘 = 5400秒）
+  const MAX_RECORDING_TIME = 90 * 60 // 5400秒
+
   const isRecording = computed(() => projectStore.isRecording)
   const isPaused = computed(() => projectStore.isPaused)
   const recordingTime = computed(() => projectStore.recordingTime)
+
+  // 🔑 新增：剩餘時間計算
+  const remainingTime = computed(() => {
+    return Math.max(0, MAX_RECORDING_TIME - projectStore.recordingTime)
+  })
+
+  // 🔑 新增：是否接近時間限制
+  const isNearTimeLimit = computed(() => {
+    return projectStore.recordingTime > MAX_RECORDING_TIME * 0.9 // 90%時警告
+  })
 
   let recordingTimer: number | null = null
 
@@ -120,10 +133,16 @@ export function useRecording() {
     }
   }
 
-  // 計時器
+  // 🔑 修改：計時器加入時間限制檢查
   const startTimer = (): void => {
     recordingTimer = window.setInterval(() => {
       projectStore.recordingTime++
+
+      // 🔑 檢查是否達到最大錄音時間
+      if (projectStore.recordingTime >= MAX_RECORDING_TIME) {
+        console.log('⏰ 達到最大錄音時間（90分鐘），自動停止錄音')
+        stopRecording()
+      }
     }, 1000)
   }
 
@@ -141,6 +160,13 @@ export function useRecording() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
+  // 🔑 新增：格式化剩餘時間
+  const formatRemainingTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
+
   return {
     isRecording,
     isPaused,
@@ -149,6 +175,11 @@ export function useRecording() {
     pauseRecording,
     resumeRecording,
     stopRecording,
-    formatRecordingTime
+    formatRecordingTime,
+    // 🔑 新增的返回值
+    remainingTime,
+    formatRemainingTime,
+    isNearTimeLimit,
+    maxRecordingTimeMinutes: 90
   }
 }

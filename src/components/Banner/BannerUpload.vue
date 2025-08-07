@@ -18,7 +18,7 @@
 
       <!-- 錄音中的狀態顯示 -->
       <div v-if="isRecording || isPaused" class="mb-4 p-4 bg-red-600 bg-opacity-80 rounded-lg">
-        <div class="flex items-center justify-center gap-2 mb-3">
+        <div class="flex items-center justify-center gap-2 mb-2">
           <div
             class="w-3 h-3 rounded-full"
             :class="isPaused ? 'bg-yellow-300' : 'bg-red-300 animate-pulse'"
@@ -26,6 +26,31 @@
           <span class="text-white font-medium">
             {{ isPaused ? '錄音已暫停' : '錄音中...' }} {{ formatRecordingTime(recordingTime) }}
           </span>
+        </div>
+
+        <!-- 🔑 新增：剩餘時間顯示 -->
+        <div class="text-center mb-2">
+          <span class="text-white text-sm">
+            剩餘時間: {{ formatRemainingTime(remainingTime) }}
+          </span>
+        </div>
+
+        <!-- 🔑 新增：時間限制警告 -->
+        <div
+          v-if="isNearTimeLimit"
+          class="text-center mb-3 text-yellow-300 text-sm flex items-center justify-center gap-1"
+        >
+          <i class="pi pi-exclamation-triangle"></i>
+          <span>即將達到最大錄音時間 ({{ maxRecordingTimeMinutes }}分鐘)</span>
+        </div>
+
+        <!-- 🔑 新增：進度條 -->
+        <div class="w-full bg-red-800 rounded-full h-2 mb-3">
+          <div
+            class="h-2 rounded-full transition-all duration-1000"
+            :class="isNearTimeLimit ? 'bg-yellow-300' : 'bg-white'"
+            :style="{ width: (recordingTime / (maxRecordingTimeMinutes * 60)) * 100 + '%' }"
+          ></div>
         </div>
 
         <div class="flex gap-3 justify-center">
@@ -116,7 +141,7 @@
       <div v-if="errorMessage" class="mt-4 p-3 bg-red-500 bg-opacity-80 rounded-lg">
         <div class="flex items-center gap-2 text-white">
           <i class="pi pi-exclamation-triangle"></i>
-          <span>{{ errorMessage }}</span>
+          <span v-html="errorMessage"></span>
         </div>
       </div>
     </div>
@@ -148,7 +173,11 @@ const {
   pauseRecording: pauseRecordingComposable,
   resumeRecording: resumeRecordingComposable,
   stopRecording: stopRecordingComposable,
-  formatRecordingTime
+  formatRecordingTime,
+  remainingTime,
+  formatRemainingTime,
+  isNearTimeLimit,
+  maxRecordingTimeMinutes
 } = useRecording()
 
 const {
@@ -162,7 +191,19 @@ const audioInput = ref<HTMLInputElement | null>(null)
 const textInput = ref<HTMLInputElement | null>(null)
 const errorMessage = ref<string>('')
 
-// Methods
+// 🔑 新增：文件大小限制常數 (100MB)
+const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB in bytes
+
+// 🔑 新增：格式化文件大小顯示
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+// Methods (其他方法保持不變)
 const startRecording = async () => {
   try {
     errorMessage.value = ''
@@ -217,6 +258,7 @@ const triggerTextInput = () => {
   textInput.value?.click()
 }
 
+// 🔑 修改：音檔上傳處理函數，加入大小檢查
 const handleAudioUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
@@ -225,6 +267,39 @@ const handleAudioUpload = async (event: Event) => {
 
   try {
     errorMessage.value = ''
+
+    // 🔑 檢查文件大小
+    if (file.size > MAX_FILE_SIZE) {
+      const fileSize = formatFileSize(file.size)
+      const maxSize = formatFileSize(MAX_FILE_SIZE)
+
+      errorMessage.value = `檔案過大！您上傳的檔案為 ${fileSize}，我們只支援 ${maxSize} 以下的檔案。請壓縮檔案或分段上傳。可到以下網站壓縮音訊：<a href="https://www.arkthinker.com/zh_tw/audio-compressor/" target="_blank">Arkthinker音訊壓縮工具</a>`
+
+      // 清空 input
+      if (audioInput.value) {
+        audioInput.value.value = ''
+      }
+
+      // 使用 console.warn 記錄警告
+      console.warn('檔案過大:', {
+        fileName: file.name,
+        fileSize: fileSize,
+        maxSize: maxSize,
+        actualBytes: file.size,
+        limitBytes: MAX_FILE_SIZE
+      })
+
+      return // 直接返回，不繼續上傳
+    }
+
+    // 🔑 檢查通過，顯示檔案信息
+    const fileSize = formatFileSize(file.size)
+    console.log('準備上傳音檔:', {
+      fileName: file.name,
+      fileSize: fileSize,
+      fileType: file.type
+    })
+
     const result = await handleAudioUploadComposable(file)
     emit('audioUploaded', result)
 
@@ -232,6 +307,9 @@ const handleAudioUpload = async (event: Event) => {
     if (audioInput.value) {
       audioInput.value.value = ''
     }
+
+    // 🔑 成功上傳後可選擇顯示成功訊息
+    console.log(`✅ 音檔上傳成功: ${file.name} (${fileSize})`)
   } catch (error) {
     console.error('音檔上傳失敗:', error)
     errorMessage.value = error instanceof Error ? error.message : '音檔上傳失敗'
@@ -243,6 +321,7 @@ const handleAudioUpload = async (event: Event) => {
   }
 }
 
+// 原有的逐字稿上傳函數保持不變
 const handleTranscriptUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
@@ -269,14 +348,14 @@ const handleTranscriptUpload = async (event: Event) => {
   }
 }
 
-// 清除錯誤訊息
+// 🔑 新增：手動清除錯誤訊息（可選）
 const clearError = () => {
   errorMessage.value = ''
 }
 
-// 如果有錯誤訊息，5秒後自動清除
+// 🔑 新增：自動清除錯誤訊息（可選）
 let errorTimer: number | null = null
-const showError = (message: string) => {
+const showErrorWithAutoHide = (message: string, duration = 8000) => {
   errorMessage.value = message
 
   if (errorTimer) {
@@ -285,7 +364,7 @@ const showError = (message: string) => {
 
   errorTimer = window.setTimeout(() => {
     errorMessage.value = ''
-  }, 5000)
+  }, duration) // 文件過大錯誤顯示8秒，讓用戶有時間閱讀
 }
 </script>
 

@@ -1,4 +1,3 @@
-<!-- File: components/Dashboard/TranscriptPanel.vue -->
 <template>
   <div class="transcript-panel space-y-6">
     <!-- 音檔播放器區域 (只有上傳音檔時顯示) -->
@@ -67,16 +66,28 @@
       <template #title>
         <div class="flex items-center gap-2">
           <i class="pi pi-pencil text-green-600"></i>
-          其他補充說明（可用語音輸入）
+          其他補充說明
         </div>
       </template>
       <template #content>
-        <Textarea
-          v-model="socialWorkerNotes"
-          placeholder="請在此補充相關說明、觀察重點或其他需要記錄的資訊..."
-          :rows="8"
-          class="w-full resize-none"
-        />
+        <div class="space-y-3">
+          <!-- 語音輸入組件 -->
+          <VoiceInput
+            :max-duration-minutes="10"
+            :max-file-size-mb="80"
+            @transcript="handleVoiceTranscript"
+            @progress="handleVoiceProgress"
+            @error="handleVoiceError"
+          />
+
+          <!-- 文字輸入區域 -->
+          <Textarea
+            v-model="socialWorkerNotes"
+            placeholder="請在此補充相關說明、觀察重點或其他需要記錄的資訊... (可使用上方語音輸入功能)"
+            :rows="8"
+            class="w-full resize-none"
+          />
+        </div>
       </template>
     </Card>
 
@@ -102,24 +113,20 @@
           outlined
           :disabled="!transcript.trim()"
         />
-        <Button
-          label="下一步：記錄設定"
-          icon="pi pi-arrow-right"
-          @click="proceedToConfig"
-          :disabled="!canProceedToConfig"
-        />
+        <Button label="下一步：記錄設定" icon="pi pi-arrow-right" @click="proceedToConfig" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useProjectStore } from '@/stores/useProjectStore'
 import { useSessionStore } from '@/stores/useSessionStore'
 import { useApiIntegration } from '@/composables/useApiIntegration'
 import { useDownload } from '@/composables/useDownload'
+import { useToast } from 'primevue/usetoast'
 
 // Components
 import Card from 'primevue/card'
@@ -127,9 +134,11 @@ import Textarea from 'primevue/textarea'
 import Button from 'primevue/button'
 import ProgressBar from 'primevue/progressbar'
 import AudioPlayer from '@/components/Common/AudioPlayer.vue'
+import VoiceInput from '@/components/Common/VoiceInput.vue'
 
 const projectStore = useProjectStore()
 const sessionStore = useSessionStore()
+const toast = useToast()
 const { transcribeAudio } = useApiIntegration()
 const { downloadTranscript: downloadTranscriptFile } = useDownload()
 
@@ -154,7 +163,12 @@ const startTranscription = async () => {
     await transcribeAudio()
   } catch (error) {
     console.error('轉換失敗:', error)
-    // 可以加入錯誤提示
+    toast.add({
+      severity: 'error',
+      summary: '轉換失敗',
+      detail: error instanceof Error ? error.message : '未知錯誤',
+      life: 5000
+    })
   }
 }
 
@@ -165,5 +179,35 @@ const downloadTranscript = () => {
 const proceedToConfig = () => {
   sessionStore.setActiveTab(1) // 切換到記錄設定頁面
   projectStore.setCurrentStep('config')
+}
+
+// 語音輸入處理函數
+const handleVoiceTranscript = (voiceText: string) => {
+  // 將語音轉錄結果附加到現有的補充說明中
+  if (socialWorkerNotes.value.trim()) {
+    socialWorkerNotes.value += '\n\n' + voiceText.trim()
+  } else {
+    socialWorkerNotes.value = voiceText.trim()
+  }
+
+  toast.add({
+    severity: 'success',
+    summary: '語音輸入完成',
+    detail: `已將語音轉錄結果添加到補充說明中`,
+    life: 3000
+  })
+}
+
+const handleVoiceProgress = (progress: number) => {
+  // 可以顯示語音轉錄進度，這裡暫時不需要額外處理
+}
+
+const handleVoiceError = (error: string) => {
+  toast.add({
+    severity: 'error',
+    summary: '語音輸入失敗',
+    detail: error,
+    life: 5000
+  })
 }
 </script>
