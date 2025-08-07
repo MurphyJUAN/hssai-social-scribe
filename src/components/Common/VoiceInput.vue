@@ -3,7 +3,7 @@
     <!-- 語音輸入按鈕 -->
     <div class="flex items-center gap-2">
       <Button
-        v-if="!isRecording && !isTranscribing"
+        v-if="!isRecording && !isTranscribing && transcriptStatus !== 'processing'"
         @click="startRecording"
         :disabled="!isSupported || !canRecord"
         class="voice-input-btn"
@@ -101,6 +101,7 @@ import { onUnmounted } from 'vue'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
 import { useVoiceInput } from '@/composables/useVoiceInput'
+import { useProjectStore } from '@/stores/useProjectStore'
 
 interface Props {
   maxDurationMinutes?: number
@@ -119,6 +120,8 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<Emits>()
+
+const { transcriptStatus } = useProjectStore()
 
 // 使用語音輸入 composable
 const {

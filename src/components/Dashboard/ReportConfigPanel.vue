@@ -231,7 +231,7 @@
         <Button
           label="下一步：生成記錄"
           icon="pi pi-arrow-right"
-          :disabled="!configValidation.isValid"
+          :disabled="!configValidation.isValid && reportStatus !== 'generating'"
           @click="proceedToReport"
         />
       </div>
@@ -259,7 +259,8 @@ const projectStore = useProjectStore()
 const sessionStore = useSessionStore()
 const { generateReport } = useApiIntegration()
 
-const { reportConfig, configValidation, totalSelectedSections } = storeToRefs(projectStore)
+const { reportConfig, reportStatus, configValidation, totalSelectedSections } =
+  storeToRefs(projectStore)
 
 // Local reactive state
 const selectAllOptional = ref(false)

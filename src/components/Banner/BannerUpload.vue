@@ -28,14 +28,14 @@
           </span>
         </div>
 
-        <!-- 🔑 新增：剩餘時間顯示 -->
+        <!-- 剩餘時間顯示 -->
         <div class="text-center mb-2">
           <span class="text-white text-sm">
             剩餘時間: {{ formatRemainingTime(remainingTime) }}
           </span>
         </div>
 
-        <!-- 🔑 新增：時間限制警告 -->
+        <!-- 時間限制警告 -->
         <div
           v-if="isNearTimeLimit"
           class="text-center mb-3 text-yellow-300 text-sm flex items-center justify-center gap-1"
@@ -44,7 +44,7 @@
           <span>即將達到最大錄音時間 ({{ maxRecordingTimeMinutes }}分鐘)</span>
         </div>
 
-        <!-- 🔑 新增：進度條 -->
+        <!-- 進度條 -->
         <div class="w-full bg-red-800 rounded-full h-2 mb-3">
           <div
             class="h-2 rounded-full transition-all duration-1000"
@@ -90,7 +90,7 @@
         <button
           class="flex bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           @click="startRecording"
-          :disabled="isProcessing"
+          :disabled="isProcessing || showingConfirm"
         >
           <img src="@/assets/voice.png" alt="record-icon" class="h-5 mr-1" />
           開始錄製
@@ -107,7 +107,7 @@
         <button
           class="flex bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800"
           @click="triggerAudioInput"
-          :disabled="isProcessing"
+          :disabled="isProcessing || showingConfirm"
         >
           <img src="@/assets/microphone.png" alt="upload-icon" class="h-5 mr-1" />
           上傳錄音檔
@@ -124,7 +124,7 @@
         <button
           class="flex bg-gray-50 text-purple-700 px-4 py-2 rounded border border-purple-700 hover:bg-gray-300"
           @click="triggerTextInput"
-          :disabled="isProcessing"
+          :disabled="isProcessing || showingConfirm"
         >
           <img src="@/assets/document.png" alt="document-icon" class="h-5 mr-1" />
           上傳逐字稿
@@ -142,6 +142,38 @@
         <div class="flex items-center gap-2 text-white">
           <i class="pi pi-exclamation-triangle"></i>
           <span v-html="errorMessage"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔑 自定義確認對話框 - 避免重複 -->
+    <div
+      v-if="showingConfirm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+    >
+      <div class="bg-white p-6 rounded-lg shadow-xl max-w-md mx-4">
+        <div class="flex items-center gap-3 mb-4">
+          <i class="pi pi-exclamation-triangle text-orange-500 text-xl"></i>
+          <h3 class="text-lg font-semibold text-gray-800">{{ confirmData.header }}</h3>
+        </div>
+
+        <div class="text-gray-600 mb-6 whitespace-pre-line leading-relaxed">
+          {{ confirmData.message }}
+        </div>
+
+        <div class="flex justify-end gap-3">
+          <button
+            @click="cancelConfirm"
+            class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+          >
+            取消
+          </button>
+          <button
+            @click="acceptConfirm"
+            class="px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded transition-colors"
+          >
+            確定清除
+          </button>
         </div>
       </div>
     </div>
@@ -165,6 +197,7 @@ const emit = defineEmits<{
 
 // Store and composables
 const store = useProjectStore()
+
 const {
   isRecording,
   isPaused,
@@ -191,10 +224,22 @@ const audioInput = ref<HTMLInputElement | null>(null)
 const textInput = ref<HTMLInputElement | null>(null)
 const errorMessage = ref<string>('')
 
-// 🔑 新增：文件大小限制常數 (100MB)
-const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB in bytes
+// 🔑 自定義確認對話框狀態
+const showingConfirm = ref<boolean>(false)
+const confirmData = ref<{
+  header: string
+  message: string
+  callback: () => void
+}>({
+  header: '',
+  message: '',
+  callback: () => {}
+})
 
-// 🔑 新增：格式化文件大小顯示
+// 文件大小限制 (100MB)
+const MAX_FILE_SIZE = 100 * 1024 * 1024
+
+// 格式化文件大小
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Bytes'
   const k = 1024
@@ -203,17 +248,120 @@ const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-// Methods (其他方法保持不變)
-const startRecording = async () => {
-  try {
-    errorMessage.value = ''
-    await startRecordingComposable()
-  } catch (error) {
-    console.error('開始錄音失敗:', error)
-    errorMessage.value = error instanceof Error ? error.message : '開始錄音失敗'
+// 檢查是否有需要保存的工作內容
+const hasWorkToSave = computed(() => {
+  return store.transcript.trim() || store.reportDraft.trim() || store.treatmentPlan.trim()
+})
+
+// 獲取需要保存的內容摘要
+const getWorkSummary = (): string => {
+  const items: string[] = []
+
+  if (store.transcript.trim()) {
+    items.push(`• 逐字稿 (${store.transcript.length} 字)`)
   }
+
+  if (store.reportDraft.trim()) {
+    items.push(`• 訪視記錄初稿 (${store.reportDraft.length} 字)`)
+  }
+
+  if (store.treatmentPlan.trim()) {
+    items.push(`• 處遇計畫 (${store.treatmentPlan.length} 字)`)
+  }
+
+  return items.join('\n')
 }
 
+// 重置工作區內容
+const resetWorkspace = () => {
+  store.transcript = ''
+  store.socialWorkerNotes = ''
+  store.reportDraft = ''
+  store.treatmentPlan = ''
+  store.transcriptStatus = 'idle'
+  store.transcriptProgress = 0
+  store.reportStatus = 'idle'
+  store.reportProgress = 0
+  store.treatmentStatus = 'idle'
+  store.treatmentProgress = 0
+  store.reportConfig.selectedSections = []
+  store.treatmentConfig.selectedServiceDomains = []
+}
+
+// 🔑 顯示自定義確認對話框
+const showCustomConfirm = (actionType: string, callback: () => void): void => {
+  if (!hasWorkToSave.value) {
+    // 沒有工作內容，直接執行
+    callback()
+    return
+  }
+
+  let message = ''
+  let header = ''
+
+  switch (actionType) {
+    case 'recording':
+      header = '開始新錄音'
+      break
+    case 'upload-audio':
+      header = '上傳新音檔'
+      break
+    case 'upload-transcript':
+      header = '上傳新逐字稿'
+      break
+  }
+
+  message = `目前工作區有以下內容將會被清除：\n\n${getWorkSummary()}\n\n建議先下載保存這些內容，確定要繼續嗎？`
+
+  confirmData.value = {
+    header,
+    message,
+    callback
+  }
+
+  showingConfirm.value = true
+}
+
+// 🔑 確認對話框操作
+const acceptConfirm = () => {
+  showingConfirm.value = false
+  resetWorkspace()
+  confirmData.value.callback()
+}
+
+const cancelConfirm = () => {
+  showingConfirm.value = false
+  confirmData.value = { header: '', message: '', callback: () => {} }
+}
+
+// 🔑 按鈕點擊處理函數
+const startRecording = () => {
+  showCustomConfirm('recording', async () => {
+    try {
+      errorMessage.value = ''
+      await startRecordingComposable()
+    } catch (error) {
+      console.error('開始錄音失敗:', error)
+      errorMessage.value = error instanceof Error ? error.message : '開始錄音失敗'
+    }
+  })
+}
+
+const triggerAudioInput = () => {
+  showCustomConfirm('upload-audio', () => {
+    errorMessage.value = ''
+    audioInput.value?.click()
+  })
+}
+
+const triggerTextInput = () => {
+  showCustomConfirm('upload-transcript', () => {
+    errorMessage.value = ''
+    textInput.value?.click()
+  })
+}
+
+// 其他不變的方法
 const pauseRecording = () => {
   try {
     pauseRecordingComposable()
@@ -248,17 +396,7 @@ const stopRecording = () => {
   }
 }
 
-const triggerAudioInput = () => {
-  errorMessage.value = ''
-  audioInput.value?.click()
-}
-
-const triggerTextInput = () => {
-  errorMessage.value = ''
-  textInput.value?.click()
-}
-
-// 🔑 修改：音檔上傳處理函數，加入大小檢查
+// 文件上傳處理
 const handleAudioUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
@@ -268,60 +406,35 @@ const handleAudioUpload = async (event: Event) => {
   try {
     errorMessage.value = ''
 
-    // 🔑 檢查文件大小
+    // 檢查文件大小
     if (file.size > MAX_FILE_SIZE) {
       const fileSize = formatFileSize(file.size)
       const maxSize = formatFileSize(MAX_FILE_SIZE)
 
       errorMessage.value = `檔案過大！您上傳的檔案為 ${fileSize}，我們只支援 ${maxSize} 以下的檔案。請壓縮檔案或分段上傳。可到以下網站壓縮音訊：<a href="https://www.arkthinker.com/zh_tw/audio-compressor/" target="_blank">Arkthinker音訊壓縮工具</a>`
 
-      // 清空 input
       if (audioInput.value) {
         audioInput.value.value = ''
       }
-
-      // 使用 console.warn 記錄警告
-      console.warn('檔案過大:', {
-        fileName: file.name,
-        fileSize: fileSize,
-        maxSize: maxSize,
-        actualBytes: file.size,
-        limitBytes: MAX_FILE_SIZE
-      })
-
-      return // 直接返回，不繼續上傳
+      return
     }
-
-    // 🔑 檢查通過，顯示檔案信息
-    const fileSize = formatFileSize(file.size)
-    console.log('準備上傳音檔:', {
-      fileName: file.name,
-      fileSize: fileSize,
-      fileType: file.type
-    })
 
     const result = await handleAudioUploadComposable(file)
     emit('audioUploaded', result)
 
-    // 清空 input
     if (audioInput.value) {
       audioInput.value.value = ''
     }
-
-    // 🔑 成功上傳後可選擇顯示成功訊息
-    console.log(`✅ 音檔上傳成功: ${file.name} (${fileSize})`)
   } catch (error) {
     console.error('音檔上傳失敗:', error)
     errorMessage.value = error instanceof Error ? error.message : '音檔上傳失敗'
 
-    // 清空 input
     if (audioInput.value) {
       audioInput.value.value = ''
     }
   }
 }
 
-// 原有的逐字稿上傳函數保持不變
 const handleTranscriptUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
@@ -333,7 +446,6 @@ const handleTranscriptUpload = async (event: Event) => {
     const result = await handleTranscriptUploadComposable(file)
     emit('transcriptUploaded', result)
 
-    // 清空 input
     if (textInput.value) {
       textInput.value.value = ''
     }
@@ -341,35 +453,14 @@ const handleTranscriptUpload = async (event: Event) => {
     console.error('逐字稿上傳失敗:', error)
     errorMessage.value = error instanceof Error ? error.message : '逐字稿上傳失敗'
 
-    // 清空 input
     if (textInput.value) {
       textInput.value.value = ''
     }
   }
 }
-
-// 🔑 新增：手動清除錯誤訊息（可選）
-const clearError = () => {
-  errorMessage.value = ''
-}
-
-// 🔑 新增：自動清除錯誤訊息（可選）
-let errorTimer: number | null = null
-const showErrorWithAutoHide = (message: string, duration = 8000) => {
-  errorMessage.value = message
-
-  if (errorTimer) {
-    clearTimeout(errorTimer)
-  }
-
-  errorTimer = window.setTimeout(() => {
-    errorMessage.value = ''
-  }, duration) // 文件過大錯誤顯示8秒，讓用戶有時間閱讀
-}
 </script>
 
 <style scoped>
-/* 可以加入一些自定義樣式 */
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -384,7 +475,6 @@ const showErrorWithAutoHide = (message: string, duration = 8000) => {
   }
 }
 
-/* 按鈕 hover 效果 */
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -399,7 +489,6 @@ button:not(:disabled):hover {
   transition: transform 0.2s ease;
 }
 
-/* 錯誤訊息淡入動畫 */
 .error-message {
   animation: fadeIn 0.3s ease-in-out;
 }
