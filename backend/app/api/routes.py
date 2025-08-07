@@ -3,7 +3,7 @@
 # ================================
 
 from fastapi import APIRouter
-from .endpoints import transcription, report, treatment_plan
+from .endpoints import transcription, report, treatment_plan, analytics
 
 api_router = APIRouter()
 
@@ -11,4 +11,5 @@ api_router = APIRouter()
 api_router.include_router(transcription.router, tags=["transcription"])
 api_router.include_router(report.router, tags=["report"])
 api_router.include_router(treatment_plan.router, tags=["treatment_plan"])
+api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])  # 🔑 新增
 # api_router.include_router(health.router, tags=["health"])

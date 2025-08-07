@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import UserGuideView from '@/views/UserGuideView.vue'
 import SecurityGuideView from '@/views/SecurityGuideView.vue'
 import DeveloperTeamView from '@/views/DeveloperTeamView.vue'
+import MonitorView from '@/views/MonitorView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,6 +31,12 @@ const router = createRouter({
       name: 'devTeam',
       alias: '/devTeam',
       component: DeveloperTeamView
+    },
+    {
+      path: '/monitor',
+      name: 'monitor',
+      alias: '/monitor',
+      component: MonitorView
     }
   ]
 })

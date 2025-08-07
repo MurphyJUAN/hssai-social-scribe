@@ -18,8 +18,6 @@ export function useApiIntegration() {
       isLoading.value = true
       error.value = null
 
-      projectStore.setTranscriptStatus('processing', 0)
-
       const transcript = await apiService.transcribeAudio(
         projectStore.audioFile,
         (progress: number, partialTranscript?: string) => {
@@ -33,9 +31,9 @@ export function useApiIntegration() {
       projectStore.setTranscript(transcript)
       projectStore.setTranscriptStatus('completed', 100)
     } catch (err) {
+      projectStore.setTranscriptStatus('error', 0)
       const errorMessage = err instanceof Error ? err.message : '轉換失敗'
       error.value = errorMessage
-      projectStore.setTranscriptStatus('error', 0)
       throw new Error(errorMessage)
     } finally {
       isLoading.value = false
@@ -48,7 +46,6 @@ export function useApiIntegration() {
       isLoading.value = true
       error.value = null
 
-      projectStore.setReportStatus('generating', 0)
       projectStore.clearReportDraft()
 
       const reportData = {
@@ -73,9 +70,9 @@ export function useApiIntegration() {
       projectStore.reportDraft = report
       projectStore.setReportStatus('completed', 100)
     } catch (err) {
+      projectStore.setReportStatus('error', 0)
       const errorMessage = err instanceof Error ? err.message : '生成失敗'
       error.value = errorMessage
-      projectStore.setReportStatus('error', 0)
       throw new Error(errorMessage)
     } finally {
       isLoading.value = false
@@ -88,7 +85,6 @@ export function useApiIntegration() {
       isLoading.value = true
       error.value = null
 
-      projectStore.setTreatmentStatus('generating', 0)
       projectStore.clearTreatmentPlan()
 
       const treatmentData = {

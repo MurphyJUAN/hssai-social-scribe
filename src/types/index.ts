@@ -35,11 +35,14 @@ export interface ProjectData {
   projectName: string
   audioFile: AudioFile | null
   transcript: string
+  transcriptStatus: string
   socialWorkerNotes: string
   reportConfig: ReportConfig
   reportDraft: string
+  reportStatus: string
   treatmentConfig: TreatmentConfig
   treatmentPlan: string
+  treatmentStatus: string
   currentStep: StepType
   createdAt: string
   updatedAt: string

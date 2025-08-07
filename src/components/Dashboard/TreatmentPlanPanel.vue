@@ -103,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useProjectStore } from '@/stores/useProjectStore'
 import { useApiIntegration } from '@/composables/useApiIntegration'
@@ -145,9 +145,12 @@ const toggleServiceDomain = (domainValue: string) => {
 
 const generateTreatmentPlan = async () => {
   try {
+    projectStore.setTreatmentStatus('generating', 0)
+    await nextTick()
     await generateTreatmentPlanAPI()
   } catch (error) {
     console.error('生成處遇計畫失敗:', error)
+    projectStore.setTreatmentStatus('error', 0)
   }
 }
 

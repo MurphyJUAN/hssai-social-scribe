@@ -35,7 +35,7 @@
     </Card>
 
     <!-- 空狀態提示 -->
-    <Card v-if="reportStatus === 'idle'" class="empty-state-card">
+    <Card v-if="reportStatus === 'idle' && !reportDraft.length" class="empty-state-card">
       <template #content>
         <div class="text-center py-12">
           <i class="pi pi-file-plus text-gray-400 text-4xl mb-4"></i>
@@ -82,6 +82,7 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useProjectStore } from '@/stores/useProjectStore'
 import { useSessionStore } from '@/stores/useSessionStore'
@@ -123,4 +124,16 @@ const proceedToTreatment = () => {
   sessionStore.setActiveTab(3) // 切換到處遇計畫頁面
   projectStore.setCurrentStep('treatment')
 }
+
+onMounted(() => {
+  console.log('🎬 ReportDraftPanel 掛載，狀態:', reportStatus.value)
+})
+
+watch(
+  reportStatus,
+  (newStatus) => {
+    console.log('📈 ReportDraftPanel 狀態變化:', newStatus)
+  },
+  { immediate: true }
+)
 </script>

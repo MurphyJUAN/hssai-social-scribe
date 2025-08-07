@@ -240,7 +240,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useProjectStore } from '@/stores/useProjectStore'
 import { useSessionStore } from '@/stores/useSessionStore'
@@ -377,10 +377,18 @@ const proceedToReport = async (): Promise<void> => {
     sessionStore.setActiveTab(2)
     projectStore.setCurrentStep('draft')
 
+    await nextTick()
+    await new Promise((resolve) => setTimeout(resolve, 200)) // 確保組件完全掛載
+
+    projectStore.setReportStatus('generating', 0)
+
+    await nextTick()
+
     // 開始生成記錄
     await generateReport()
   } catch (error) {
     console.error('生成記錄失敗:', error)
+    projectStore.setReportStatus('error', 0)
     // 可以加入錯誤提示
   }
 }

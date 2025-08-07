@@ -160,6 +160,16 @@ const audioFileName = computed(() => {
 // Methods
 const startTranscription = async () => {
   try {
+    projectStore.setTranscriptStatus('processing', 0)
+
+    // 🔑 立即顯示提示
+    toast.add({
+      severity: 'info',
+      summary: '開始轉換',
+      detail: '正在準備轉換您的音檔，請稍候...',
+      life: 3000
+    })
+
     await transcribeAudio()
   } catch (error) {
     console.error('轉換失敗:', error)
@@ -169,6 +179,7 @@ const startTranscription = async () => {
       detail: error instanceof Error ? error.message : '未知錯誤',
       life: 5000
     })
+    projectStore.setTranscriptStatus('error', 0)
   }
 }
 

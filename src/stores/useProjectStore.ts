@@ -238,6 +238,7 @@ export const useProjectStore = defineStore('project', () => {
 
   // 設置記錄狀態
   const setReportStatus = (status: StatusType, progress: number = 0) => {
+    console.log('🔧 setReportStatus 被調用:', { status, progress }) // 調試日誌
     reportStatus.value = status
     reportProgress.value = progress
   }
@@ -245,7 +246,6 @@ export const useProjectStore = defineStore('project', () => {
   // 清空記錄初稿
   const clearReportDraft = () => {
     reportDraft.value = ''
-    reportStatus.value = 'idle'
     reportProgress.value = 0
   }
 
@@ -279,7 +279,6 @@ export const useProjectStore = defineStore('project', () => {
   // 清空處遇計畫
   const clearTreatmentPlan = () => {
     treatmentPlan.value = ''
-    treatmentStatus.value = 'idle'
     treatmentProgress.value = 0
   }
 
@@ -303,11 +302,14 @@ export const useProjectStore = defineStore('project', () => {
           }
         : null,
       transcript: transcript.value,
+      transcriptStatus: transcriptStatus.value,
       socialWorkerNotes: socialWorkerNotes.value,
       reportConfig: reportConfig.value,
       reportDraft: reportDraft.value,
+      reportStatus: reportStatus.value,
       treatmentConfig: treatmentConfig.value,
       treatmentPlan: treatmentPlan.value,
+      treatmentStatus: treatmentStatus.value,
       currentStep: currentStep.value,
       createdAt: projectId.value ? '' : new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -343,11 +345,14 @@ export const useProjectStore = defineStore('project', () => {
       projectName.value = projectData.projectName
       audioUrl.value = projectData.audioFile?.url || ''
       transcript.value = projectData.transcript || ''
+      transcriptStatus.value = (projectData.transcriptStatus || 'idle') as StatusType
       socialWorkerNotes.value = projectData.socialWorkerNotes || ''
       reportConfig.value = projectData.reportConfig || reportConfig.value
       reportDraft.value = projectData.reportDraft || ''
+      reportStatus.value = (projectData.reportStatus || 'idle') as StatusType
       treatmentConfig.value = projectData.treatmentConfig || treatmentConfig.value
       treatmentPlan.value = projectData.treatmentPlan || ''
+      treatmentStatus.value = (projectData.treatmentStatus || 'idle') as StatusType
       currentStep.value = projectData.currentStep || 'transcript'
       hasUploaded.value = true
     }
