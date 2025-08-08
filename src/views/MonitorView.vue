@@ -125,13 +125,8 @@
 
         <!-- API端點使用分佈 -->
         <div class="bg-white p-6 rounded-lg shadow-md">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">API端點使用分佈</h3>
-          <Chart
-            type="doughnut"
-            :data="apiEndpointsChart"
-            :options="doughnutOptions"
-            class="h-64"
-          />
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">API端點每日請求趨勢</h3>
+          <Chart type="line" :data="apiTrendChart" :options="apiTrendChartOptions" class="h-64" />
         </div>
 
         <!-- 成功率趨勢 -->
@@ -332,6 +327,36 @@ const successRateChart = computed(() => ({
   ]
 }))
 
+const apiTrendChart = computed(() => ({
+  labels: chartData.value.map((d) => formatDate(d.date)),
+  datasets: [
+    {
+      label: '轉錄API',
+      data: chartData.value.map((d) => d.transcribe_count),
+      borderColor: '#3B82F6',
+      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+      fill: true,
+      tension: 0.4
+    },
+    {
+      label: '報告API',
+      data: chartData.value.map((d) => d.report_count),
+      borderColor: '#10B981',
+      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+      fill: true,
+      tension: 0.4
+    },
+    {
+      label: '處遇計劃API',
+      data: chartData.value.map((d) => d.treatment_count),
+      borderColor: '#F59E0B',
+      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+      fill: true,
+      tension: 0.4
+    }
+  ]
+}))
+
 // 圖表配置
 const chartOptions = {
   responsive: true,
@@ -407,13 +432,6 @@ const loadData = async () => {
   try {
     const start = formatDateForAPI(startDate.value)
     const end = formatDateForAPI(endDate.value)
-
-    // 調試：在控制台顯示發送的日期
-    console.log('選擇的開始日期:', startDate.value)
-    console.log('選擇的結束日期:', endDate.value)
-    console.log('發送給API的開始日期:', start)
-    console.log('發送給API的結束日期:', end)
-
     await analyticsStore.fetchTrafficData(start, end)
   } catch (err) {
     error.value = err instanceof Error ? err.message : '載入數據時發生錯誤'
