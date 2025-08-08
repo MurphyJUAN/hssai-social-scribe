@@ -12,6 +12,7 @@ from starlette.responses import Response
 from models.api_usage_log import ApiUsageLog
 from core.database import get_db_context
 import logging
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -91,9 +92,11 @@ class ApiLoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         """處理請求並記錄"""
         path = request.url.path
+
         
         if not self.should_log(path):
             return await call_next(request)
+        
         
         # 記錄開始時間
         start_time = time.time()
@@ -143,7 +146,7 @@ class ApiLoggingMiddleware(BaseHTTPMiddleware):
         # 異步記錄到數據庫
         try:
             await self.log_to_database(
-                timestamp=time.time(),
+                timestamp=datetime.fromtimestamp(time.time()),
                 ip=ip,
                 endpoint=path,
                 method=method,

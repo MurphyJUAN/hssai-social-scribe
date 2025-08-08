@@ -38,7 +38,7 @@ class TreatmentPlanGenerator:
             current_progress = 30
             
             with self.claude_client.messages.stream(
-                model="claude-3-sonnet-20240229",
+                model="claude-4-sonnet-20250514",
                 max_tokens=4000,
                 temperature=0.3,
                 messages=[{"role": "user", "content": prompt}]
