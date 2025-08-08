@@ -197,6 +197,10 @@ export const useProjectStore = defineStore('project', () => {
     transcript.value += chunk
   }
 
+  const setSocialWorkerNotes = (text: string) => {
+    socialWorkerNotes.value = text
+  }
+
   // 設置轉換狀態
   const setTranscriptStatus = (status: StatusType, progress: number = 0) => {
     transcriptStatus.value = status
@@ -435,6 +439,7 @@ export const useProjectStore = defineStore('project', () => {
     // Actions
     setAudioFile,
     setTranscript,
+    setSocialWorkerNotes,
     updateTranscript,
     setTranscriptStatus,
     updateReportConfig,

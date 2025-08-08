@@ -125,13 +125,8 @@
 
         <!-- API端點使用分佈 -->
         <div class="bg-white p-6 rounded-lg shadow-md">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">API端點使用分佈</h3>
-          <Chart
-            type="doughnut"
-            :data="apiEndpointsChart"
-            :options="doughnutOptions"
-            class="h-64"
-          />
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">API端點每日請求趨勢</h3>
+          <Chart type="line" :data="apiTrendChart" :options="apiTrendChartOptions" class="h-64" />
         </div>
 
         <!-- 成功率趨勢 -->
@@ -332,6 +327,36 @@ const successRateChart = computed(() => ({
   ]
 }))
 
+const apiTrendChart = computed(() => ({
+  labels: chartData.value.map((d) => formatDate(d.date)),
+  datasets: [
+    {
+      label: '轉錄API',
+      data: chartData.value.map((d) => d.transcribe_count),
+      borderColor: '#3B82F6',
+      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+      fill: true,
+      tension: 0.4
+    },
+    {
+      label: '報告API',
+      data: chartData.value.map((d) => d.report_count),
+      borderColor: '#10B981',
+      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+      fill: true,
+      tension: 0.4
+    },
+    {
+      label: '處遇計劃API',
+      data: chartData.value.map((d) => d.treatment_count),
+      borderColor: '#F59E0B',
+      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+      fill: true,
+      tension: 0.4
+    }
+  ]
+}))
+
 // 圖表配置
 const chartOptions = {
   responsive: true,
@@ -364,13 +389,33 @@ const percentageChartOptions = {
   }
 }
 
-const doughnutOptions = {
+const apiTrendChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      position: 'bottom'
+      display: true,
+      position: 'top'
     }
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      title: {
+        display: true,
+        text: '請求次數'
+      }
+    },
+    x: {
+      title: {
+        display: true,
+        text: '日期'
+      }
+    }
+  },
+  interaction: {
+    mode: 'index',
+    intersect: false
   }
 }
 
@@ -424,7 +469,11 @@ const formatDate = (dateString: string) => {
 }
 
 const formatDateForAPI = (date: Date) => {
-  return date.toISOString().split('T')[0]
+  // 使用本地時間格式化，避免時區轉換問題
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 const formatFileSize = (bytes: number) => {

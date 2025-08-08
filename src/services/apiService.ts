@@ -95,6 +95,9 @@ export const apiService = {
           let buffer = '' // 添加緩衝區處理不完整的數據
 
           function readStream(): void {
+            if (!reader) {
+              throw new Error('reader 尚未初始化')
+            }
             reader
               .read()
               .then(({ done, value }) => {

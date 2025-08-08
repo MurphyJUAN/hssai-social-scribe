@@ -98,7 +98,8 @@ interface AudioUploadData {
 }
 
 interface TranscriptUploadData {
-  content: string
+  transcript: string
+  socialWorkerNotes: string
 }
 
 interface RecordingData {
@@ -130,7 +131,8 @@ const handleAudioUpload = (audioData: AudioUploadData) => {
 }
 
 const handleTranscriptUpload = (transcriptData: TranscriptUploadData) => {
-  projectStore.setTranscript(transcriptData.content)
+  projectStore.setTranscript(transcriptData.transcript)
+  projectStore.setSocialWorkerNotes(transcriptData.socialWorkerNotes)
   projectStore.setCurrentStep('transcript')
 }
 

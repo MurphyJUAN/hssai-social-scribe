@@ -202,7 +202,13 @@ export function useVoiceInput(options: VoiceInputOptions = {}) {
 
   // 檢查瀏覽器支持
   const isSupported = computed(() => {
-    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder)
+    return (
+      typeof navigator !== 'undefined' &&
+      typeof navigator.mediaDevices !== 'undefined' &&
+      typeof navigator.mediaDevices.getUserMedia === 'function' &&
+      typeof window !== 'undefined' &&
+      typeof window.MediaRecorder === 'function'
+    )
   })
 
   // 清理資源
