@@ -181,7 +181,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useProjectStore } from '@/stores/useProjectStore'
 import { useRecording } from '@/composables/useRecording'
@@ -191,12 +191,13 @@ import bgUrl from '@/assets/banner-background-img.png'
 // Emit events
 const emit = defineEmits<{
   (event: 'audioUploaded', data: { file: File; url: string }): void
-  (event: 'transcriptUploaded', data: { content: string }): void
+  (event: 'transcriptUploaded', data: { transcript: string; socialWorkerNotes: string }): void
   (event: 'recordingCompleted', data: { file: File; url: string }): void
 }>()
 
 // Store and composables
 const store = useProjectStore()
+const { transcript, socialWorkerNotes, reportDraft, treatmentPlan } = storeToRefs(store)
 
 const {
   isRecording,
@@ -250,23 +251,23 @@ const formatFileSize = (bytes: number): string => {
 
 // 檢查是否有需要保存的工作內容
 const hasWorkToSave = computed(() => {
-  return store.transcript.trim() || store.reportDraft.trim() || store.treatmentPlan.trim()
+  return transcript.value.trim() || reportDraft.value.trim() || treatmentPlan.value.trim()
 })
 
 // 獲取需要保存的內容摘要
 const getWorkSummary = (): string => {
   const items: string[] = []
 
-  if (store.transcript.trim()) {
-    items.push(`• 逐字稿 (${store.transcript.length} 字)`)
+  if (transcript.value.trim()) {
+    items.push(`• 逐字稿 (${transcript.value.length} 字)`)
   }
 
-  if (store.reportDraft.trim()) {
-    items.push(`• 訪視記錄初稿 (${store.reportDraft.length} 字)`)
+  if (reportDraft.value.trim()) {
+    items.push(`• 訪視記錄初稿 (${reportDraft.value.length} 字)`)
   }
 
-  if (store.treatmentPlan.trim()) {
-    items.push(`• 處遇計畫 (${store.treatmentPlan.length} 字)`)
+  if (treatmentPlan.value.trim()) {
+    items.push(`• 處遇計畫 (${treatmentPlan.value.length} 字)`)
   }
 
   return items.join('\n')
@@ -435,6 +436,7 @@ const handleAudioUpload = async (event: Event) => {
   }
 }
 
+// 🔑 增強的逐字稿上傳處理 - 支援智能解析
 const handleTranscriptUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
@@ -443,12 +445,48 @@ const handleTranscriptUpload = async (event: Event) => {
 
   try {
     errorMessage.value = ''
-    const result = await handleTranscriptUploadComposable(file)
-    emit('transcriptUploaded', result)
+
+    // 讀取文件內容
+    const fileContent = await readFileContent(file)
+    console.log('讀取的文件內容:', fileContent) // Debug
+
+    // 解析逐字稿內容
+    const parsedContent = parseTranscriptContent(fileContent)
+    // console.log('解析結果:', parsedContent) // Debug
+
+    // // ⚠️ 確認設定到 store 之前的狀態
+    // console.log('設定前 - store.transcript:', transcript.value)
+    // console.log('設定前 - store.socialWorkerNotes:', socialWorkerNotes.value)
+
+    // // 設置到 store
+    // transcript.value = parsedContent.transcript
+    // socialWorkerNotes.value = parsedContent.socialWorkerNotes
+
+    // // ⚠️ 確認設定到 store 之後的狀態
+    // console.log('設定後 - store.transcript:', transcript.value)
+    // console.log('設定後 - store.socialWorkerNotes:', socialWorkerNotes.value)
+
+    // 發送解析後的結果
+    emit('transcriptUploaded', {
+      transcript: parsedContent.transcript,
+      socialWorkerNotes: parsedContent.socialWorkerNotes
+    })
 
     if (textInput.value) {
       textInput.value.value = ''
     }
+
+    // 顯示解析結果提示
+    if (parsedContent.hasSections) {
+      errorMessage.value = `✅ 成功解析逐字稿！<br/>• 逐字稿內容：${parsedContent.transcript.length} 字<br/>• 補充說明：${parsedContent.socialWorkerNotes.length} 字`
+    } else {
+      errorMessage.value = `✅ 逐字稿上傳成功！內容已放入逐字稿區域（${parsedContent.transcript.length} 字）`
+    }
+
+    // 3秒後清除提示
+    setTimeout(() => {
+      errorMessage.value = ''
+    }, 3000)
   } catch (error) {
     console.error('逐字稿上傳失敗:', error)
     errorMessage.value = error instanceof Error ? error.message : '逐字稿上傳失敗'
@@ -456,6 +494,152 @@ const handleTranscriptUpload = async (event: Event) => {
     if (textInput.value) {
       textInput.value.value = ''
     }
+  }
+}
+
+// 讀取文件內容的輔助函數
+const readFileContent = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+
+    reader.onload = (e) => {
+      const content = e.target?.result as string
+      if (content) {
+        resolve(content)
+      } else {
+        reject(new Error('無法讀取文件內容'))
+      }
+    }
+
+    reader.onerror = () => {
+      reject(new Error('文件讀取失敗'))
+    }
+
+    reader.readAsText(file, 'UTF-8')
+  })
+}
+
+// 解析逐字稿內容的輔助函數
+const parseTranscriptContent = (content: string) => {
+  console.log('原始內容:', content) // Debug
+
+  // 清理內容，移除多餘的空白和換行
+  const cleanContent = content.trim()
+  console.log('清理後內容:', cleanContent) // Debug
+
+  // 檢查是否包含兩個標準的段落標記 - 使用 gm 修飾符
+  const transcriptSectionRegex = /^=== ?逐字稿內容 ?===\s*$/gm
+  const notesSectionRegex = /^=== ?社工補充說明 ?===\s*$/gm
+
+  const hasTranscriptSection = transcriptSectionRegex.test(cleanContent)
+  const hasNotesSection = notesSectionRegex.test(cleanContent)
+
+  console.log('hasTranscriptSection:', hasTranscriptSection) // Debug
+  console.log('hasNotesSection:', hasNotesSection) // Debug
+
+  if (hasTranscriptSection && hasNotesSection) {
+    // 重新創建正則表達式（因為 test() 會改變 lastIndex）
+    const transcriptMatch = cleanContent.match(/^=== ?逐字稿內容 ?===\s*$/gm)
+    const notesMatch = cleanContent.match(/^=== ?社工補充說明 ?===\s*$/gm)
+
+    console.log('transcriptMatch:', transcriptMatch) // Debug
+    console.log('notesMatch:', notesMatch) // Debug
+
+    if (transcriptMatch && notesMatch) {
+      // 找到標題在文本中的位置
+      const transcriptTitleIndex = cleanContent.indexOf(transcriptMatch[0])
+      const notesTitleIndex = cleanContent.indexOf(notesMatch[0])
+
+      console.log('transcriptTitleIndex:', transcriptTitleIndex) // Debug
+      console.log('notesTitleIndex:', notesTitleIndex) // Debug
+
+      // 計算內容的起始位置
+      const transcriptStartIndex = transcriptTitleIndex + transcriptMatch[0].length
+      const notesStartIndex = notesTitleIndex + notesMatch[0].length
+
+      // 提取逐字稿內容（從逐字稿標題後到社工說明標題前）
+      const transcriptContent = cleanContent.substring(transcriptStartIndex, notesTitleIndex).trim()
+
+      // 提取社工補充說明（從社工說明標題後到結尾）
+      const notesContent = cleanContent.substring(notesStartIndex).trim()
+
+      console.log('解析結果 - transcriptContent:', transcriptContent) // Debug
+      console.log('解析結果 - notesContent:', notesContent) // Debug
+
+      return {
+        transcript: transcriptContent,
+        socialWorkerNotes: notesContent,
+        hasSections: true
+      }
+    }
+  } else if (hasTranscriptSection) {
+    // 只有逐字稿標記
+    const transcriptMatch = cleanContent.match(/^=== ?逐字稿內容 ?===\s*$/gm)
+    if (transcriptMatch) {
+      const titleIndex = cleanContent.indexOf(transcriptMatch[0])
+      const startIndex = titleIndex + transcriptMatch[0].length
+      const transcriptContent = cleanContent.substring(startIndex).trim()
+
+      return {
+        transcript: transcriptContent,
+        socialWorkerNotes: '',
+        hasSections: true
+      }
+    }
+  } else if (hasNotesSection) {
+    // 只有社工補充說明標記
+    const notesMatch = cleanContent.match(/^=== ?社工補充說明 ?===\s*$/gm)
+    if (notesMatch) {
+      const titleIndex = cleanContent.indexOf(notesMatch[0])
+      const startIndex = titleIndex + notesMatch[0].length
+      const notesContent = cleanContent.substring(startIndex).trim()
+
+      return {
+        transcript: '',
+        socialWorkerNotes: notesContent,
+        hasSections: true
+      }
+    }
+  } else {
+    // 沒有標準的段落標記，嘗試其他可能的分割方式
+    const possibleSeparators = [
+      /^-{3,}\s*社工[補充]*[說明]*\s*-{3,}$/gm,
+      /^【社工[補充]*[說明]*】$/gm,
+      /^##?\s*社工[補充]*[說明]*$/gm,
+      /^\*+\s*社工[補充]*[說明]*\s*\*+$/gm,
+      /^補充說明[:：]?\s*$/gm
+    ]
+
+    for (const separator of possibleSeparators) {
+      const match = cleanContent.match(separator)
+      if (match) {
+        const separatorIndex = cleanContent.indexOf(match[0])
+        const separatorEndIndex = separatorIndex + match[0].length
+
+        const transcriptPart = cleanContent.substring(0, separatorIndex).trim()
+        const notesPart = cleanContent.substring(separatorEndIndex).trim()
+
+        return {
+          transcript: transcriptPart,
+          socialWorkerNotes: notesPart,
+          hasSections: true
+        }
+      }
+    }
+
+    // 如果都沒有匹配到，將整個內容放入逐字稿
+    return {
+      transcript: cleanContent,
+      socialWorkerNotes: '',
+      hasSections: false
+    }
+  }
+
+  // 備用返回（理論上不應該到達這裡）
+  return {
+    transcript: cleanContent,
+    socialWorkerNotes: '',
+    hasSections: false
   }
 }
 </script>
