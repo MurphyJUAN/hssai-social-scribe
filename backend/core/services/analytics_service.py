@@ -74,6 +74,7 @@ class AnalyticsService:
                 "avg_processing_time": round(row.avg_processing_time or 0, 2),
                 "total_file_size": row.total_file_size or 0
             }
+
         
         # 填充缺失的日期
         result = []

@@ -2,7 +2,7 @@
 # 5. 統計 API 端點 - app/api/endpoints/analytics.py
 # ================================
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from core.database import get_db
