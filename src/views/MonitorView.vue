@@ -364,13 +364,33 @@ const percentageChartOptions = {
   }
 }
 
-const doughnutOptions = {
+const apiTrendChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      position: 'bottom'
+      display: true,
+      position: 'top'
     }
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      title: {
+        display: true,
+        text: '請求次數'
+      }
+    },
+    x: {
+      title: {
+        display: true,
+        text: '日期'
+      }
+    }
+  },
+  interaction: {
+    mode: 'index',
+    intersect: false
   }
 }
 
@@ -387,6 +407,13 @@ const loadData = async () => {
   try {
     const start = formatDateForAPI(startDate.value)
     const end = formatDateForAPI(endDate.value)
+
+    // 調試：在控制台顯示發送的日期
+    console.log('選擇的開始日期:', startDate.value)
+    console.log('選擇的結束日期:', endDate.value)
+    console.log('發送給API的開始日期:', start)
+    console.log('發送給API的結束日期:', end)
+
     await analyticsStore.fetchTrafficData(start, end)
   } catch (err) {
     error.value = err instanceof Error ? err.message : '載入數據時發生錯誤'
@@ -424,7 +451,11 @@ const formatDate = (dateString: string) => {
 }
 
 const formatDateForAPI = (date: Date) => {
-  return date.toISOString().split('T')[0]
+  // 使用本地時間格式化，避免時區轉換問題
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 const formatFileSize = (bytes: number) => {
