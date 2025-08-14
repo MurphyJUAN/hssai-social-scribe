@@ -130,7 +130,7 @@
             </div>
 
             <!-- 可選段落選項 (單一分類) -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div
                 v-for="section in getSectionsForCategory('個案狀況 - 其他評估項目')"
                 :key="section.value"
@@ -208,31 +208,57 @@
     </Card>
 
     <!-- 操作按鈕 -->
-    <div class="flex justify-between items-center pt-4 border-t">
-      <div class="text-sm text-gray-500">
+    <div
+      class="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 border-t gap-3 sm:gap-0"
+    >
+      <div class="text-sm text-gray-500 order-2 sm:order-1">
         <span v-if="configValidation.isValid" class="text-green-600 flex items-center gap-1">
-          <i class="pi pi-check-circle"></i>
-          {{ configValidation.message }}
+          <i class="pi pi-check-circle text-xs sm:text-sm"></i>
+          <span class="text-xs sm:text-sm">{{ configValidation.message }}</span>
         </span>
         <span v-else class="text-orange-600 flex items-center gap-1">
-          <i class="pi pi-exclamation-triangle"></i>
-          {{ configValidation.message }}
+          <i class="pi pi-exclamation-triangle text-xs sm:text-sm"></i>
+          <span class="text-xs sm:text-sm">{{ configValidation.message }}</span>
         </span>
       </div>
 
-      <div class="flex gap-3">
+      <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 order-1 sm:order-2">
+        <Button
+          label="重置"
+          icon="pi pi-refresh"
+          severity="secondary"
+          @click="resetConfig"
+          outlined
+          size="small"
+          class="w-full sm:w-auto text-sm justify-center sm:hidden"
+        />
+
         <Button
           label="重置設定"
           icon="pi pi-refresh"
           severity="secondary"
           @click="resetConfig"
           outlined
+          size="small"
+          class="hidden sm:flex w-auto text-sm justify-center"
         />
+
+        <Button
+          label="下一步"
+          icon="pi pi-arrow-right"
+          :disabled="!configValidation.isValid && reportStatus !== 'generating'"
+          @click="proceedToReport"
+          size="small"
+          class="w-full sm:w-auto text-sm justify-center font-medium sm:hidden"
+        />
+
         <Button
           label="下一步：生成記錄"
           icon="pi pi-arrow-right"
           :disabled="!configValidation.isValid && reportStatus !== 'generating'"
           @click="proceedToReport"
+          size="small"
+          class="hidden sm:flex w-auto text-sm justify-center font-medium"
         />
       </div>
     </div>
@@ -434,5 +460,27 @@ updateSelectAllOptional()
 /* Checkbox 對齊調整 */
 :deep(.p-checkbox) {
   margin-top: 0.125rem;
+}
+/* 確保按鈕在小螢幕上有適當的觸控區域 */
+@media (max-width: 640px) {
+  :deep(.p-button) {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+  }
+
+  :deep(.p-button-label) {
+    font-size: 0.875rem;
+  }
+
+  :deep(.p-button-icon) {
+    font-size: 0.875rem;
+  }
+}
+
+/* 狀態訊息在小螢幕上的微調 */
+@media (max-width: 640px) {
+  .text-gray-500 span {
+    justify-content: center;
+  }
 }
 </style>

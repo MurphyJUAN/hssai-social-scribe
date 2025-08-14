@@ -1,30 +1,12 @@
-const updateVolume = () => { if (!audioElement.value) return const volumeValue = Math.max(0,
-Math.min(100, Number(volume.value))) / 100 audioElement.value.volume = volumeValue if (volume.value
-=== 0) { isMuted.value = true audioElement.value.muted = true } else if (isMuted.value) {
-isMuted.value = false audioElement.value.muted = false } } // 下載音檔 const downloadAudio = async
-() => { if (!props.src) return try { // 獲取檔案名稱和副檔名 const fileName = props.filename ||
-'audio' const fileExtension = getFileExtension(fileName) || 'wav' const downloadFileName =
-fileName.includes('.') ? fileName : `${fileName}.${fileExtension}` // 如果是 blob URL，直接下載 if
-(props.src.startsWith('blob:')) { const link = document.createElement('a') link.href = props.src
-link.download = downloadFileName link.style.display = 'none' document.body.appendChild(link)
-link.click() document.body.removeChild(link) } else { // 如果是普通 URL，fetch 後下載 const response
-= await fetch(props.src) if (!response.ok) { throw new Error('下載失敗') } const blob = await
-response.blob() const url = URL.createObjectURL(blob) const link = document.createElement('a')
-link.href = url link.download = downloadFileName link.style.display = 'none'
-document.body.appendChild(link) link.click() document.body.removeChild(link) // 清理 URL
-setTimeout(() => URL.revokeObjectURL(url), 100) } console.log('音檔下載成功:', downloadFileName) }
-catch (error) { console.error('下載音檔失敗:', error) // 可以在這裡添加錯誤提示 } } //
-獲取檔案副檔名 const getFileExtension = (filename: string): string => { const lastDotIndex =
-filename.lastIndexOf('.') if (lastDotIndex === -1 || lastDotIndex === filename.length - 1) { return
-'' } return filename.substring(lastDotIndex + 1).toLowerCase() }<!-- File: components/Common/AudioPlayer.vue -->
+<!-- File: components/Common/AudioPlayer.vue -->
 <template>
-  <div class="audio-player bg-gray-50 rounded-lg p-4">
+  <div class="audio-player bg-gray-50 rounded-lg p-3 sm:p-4">
     <!-- 主要控制區域 -->
-    <div class="flex items-center justify-between gap-4 mb-3">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 mb-3">
       <!-- 左側：播放控制和時間 -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center justify-between sm:justify-start gap-3">
         <!-- 播放控制按鈕 -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 sm:gap-2">
           <Button
             :icon="isPlaying ? 'pi pi-pause' : 'pi pi-play'"
             @click="togglePlay"
@@ -32,6 +14,7 @@ filename.lastIndexOf('.') if (lastDotIndex === -1 || lastDotIndex === filename.l
             size="small"
             :severity="isPlaying ? 'secondary' : 'primary'"
             :disabled="!isAudioReady"
+            class="w-8 h-8 sm:w-10 sm:h-10"
           />
           <Button
             icon="pi pi-stop"
@@ -40,6 +23,7 @@ filename.lastIndexOf('.') if (lastDotIndex === -1 || lastDotIndex === filename.l
             outlined
             size="small"
             :disabled="!isAudioReady"
+            class="w-8 h-8 sm:w-10 sm:h-10"
           />
           <Button
             icon="pi pi-download"
@@ -50,11 +34,12 @@ filename.lastIndexOf('.') if (lastDotIndex === -1 || lastDotIndex === filename.l
             severity="success"
             v-tooltip.top="'下載音檔'"
             :disabled="!src"
+            class="w-8 h-8 sm:w-10 sm:h-10"
           />
         </div>
 
         <!-- 時間顯示 -->
-        <div class="flex items-center gap-2 text-sm text-gray-600 font-mono">
+        <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-600 font-mono">
           <span>{{ formatTime(currentTime) }}</span>
           <span>/</span>
           <span>{{ formatTime(duration) }}</span>
@@ -62,7 +47,7 @@ filename.lastIndexOf('.') if (lastDotIndex === -1 || lastDotIndex === filename.l
       </div>
 
       <!-- 右側：音量控制 -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center justify-center lg:justify-end gap-2 sm:gap-3">
         <Button
           :icon="isMuted ? 'pi pi-volume-off' : 'pi pi-volume-up'"
           @click="toggleMute"
@@ -70,17 +55,18 @@ filename.lastIndexOf('.') if (lastDotIndex === -1 || lastDotIndex === filename.l
           outlined
           size="small"
           :disabled="!isAudioReady"
+          class="w-8 h-8 sm:w-10 sm:h-10"
         />
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-gray-500 w-8">{{ volume }}%</span>
-          <div class="w-20">
+        <div class="flex items-center gap-1 sm:gap-2">
+          <span class="text-xs text-gray-500 w-6 sm:w-8 text-center">{{ volume }}%</span>
+          <div class="w-16 sm:w-20">
             <input
               type="range"
               min="0"
               max="100"
               v-model="volume"
               @input="updateVolume"
-              class="volume-slider"
+              class="volume-slider w-full"
               :disabled="!isAudioReady"
             />
           </div>
@@ -104,27 +90,29 @@ filename.lastIndexOf('.') if (lastDotIndex === -1 || lastDotIndex === filename.l
     </div>
 
     <!-- 檔案資訊和狀態 -->
-    <div class="flex justify-between items-center text-sm">
-      <div class="flex items-center gap-2 text-gray-600">
-        <i class="pi pi-file-audio"></i>
-        <span class="truncate max-w-[200px]" :title="filename || '音檔'">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+      <div class="flex items-center gap-2 text-gray-600 min-w-0">
+        <i class="pi pi-file-audio text-xs sm:text-sm flex-shrink-0"></i>
+        <span class="truncate text-xs sm:text-sm" :title="filename || '音檔'">
           {{ filename || '音檔' }}
         </span>
       </div>
 
       <!-- 狀態指示器 -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-shrink-0">
         <div v-if="isLoading" class="flex items-center gap-1 text-blue-600">
           <i class="pi pi-spin pi-spinner text-xs"></i>
           <span class="text-xs">載入中</span>
         </div>
         <div v-else-if="hasError" class="flex items-center gap-1 text-red-600 text-xs">
           <i class="pi pi-exclamation-triangle"></i>
-          <span>載入失敗</span>
+          <span class="hidden sm:inline">載入失敗</span>
+          <span class="sm:hidden">失敗</span>
         </div>
         <div v-else-if="isAudioReady" class="flex items-center gap-1 text-green-600 text-xs">
           <i class="pi pi-check-circle"></i>
-          <span>就緒</span>
+          <span class="hidden sm:inline">就緒</span>
+          <span class="sm:hidden">✓</span>
         </div>
       </div>
     </div>
@@ -614,5 +602,58 @@ onUnmounted(() => {
 .font-mono {
   font-family: ui-monospace, SFMono-Regular, 'SF Mono', Monaco, Consolas, 'Liberation Mono',
     'Courier New', monospace;
+}
+
+/* 音量滑桿樣式優化 */
+.volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #d1d5db;
+  border-radius: 5px;
+  outline: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #3b82f6;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #3b82f6;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+/* 手機版按鈕微調 */
+@media (max-width: 640px) {
+  :deep(.p-button) {
+    padding: 0.25rem;
+  }
+
+  :deep(.p-button-icon) {
+    font-size: 0.875rem;
+  }
+}
+
+/* 確保在極小螢幕上也能正常顯示 */
+@media (max-width: 480px) {
+  .volume-slider::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+  }
+
+  .volume-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+  }
 }
 </style>

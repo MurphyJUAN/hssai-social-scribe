@@ -119,86 +119,90 @@
     </Card>
 
     <!-- 操作按鈕區域 -->
-    <div class="flex justify-between items-center pt-4 border-t">
-      <div class="text-sm text-gray-500">
-        <span v-if="canProceedToConfig" class="text-green-600 flex items-center gap-1">
-          <i class="pi pi-check-circle"></i>
-          逐字稿已完成，可以進入下一步
-          <Badge
-            v-if="transcript.length > 0"
-            :value="`${transcript.length} 字`"
-            severity="success"
-            class="ml-2"
-          />
-        </span>
-        <span v-else class="text-orange-600 flex items-center gap-1">
-          <i class="pi pi-exclamation-triangle"></i>
-          請等待逐字稿轉換完成或上傳逐字稿內容
-        </span>
-      </div>
+    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
+      <Button
+        v-if="transcript.trim() || socialWorkerNotes.trim()"
+        label="下載內容"
+        icon="pi pi-download"
+        @click="downloadCombinedContent"
+        severity="secondary"
+        outlined
+        size="small"
+        class="w-full sm:w-auto text-sm justify-center sm:hidden"
+      />
 
-      <div class="flex gap-3">
-        <!-- 合併下載按鈕 -->
+      <Button
+        v-if="transcript.trim() || socialWorkerNotes.trim()"
+        label="下載完整內容"
+        icon="pi pi-download"
+        @click="downloadCombinedContent"
+        severity="secondary"
+        outlined
+        size="small"
+        class="hidden sm:flex w-auto text-sm justify-center"
+      />
+
+      <div v-if="transcript.trim() || socialWorkerNotes.trim()" class="relative w-full sm:w-auto">
         <Button
-          v-if="transcript.trim() || socialWorkerNotes.trim()"
-          label="下載完整內容"
-          icon="pi pi-download"
-          @click="downloadCombinedContent"
+          icon="pi pi-chevron-down"
           severity="secondary"
           outlined
+          @click="showDownloadMenu = !showDownloadMenu"
+          size="small"
+          class="w-full sm:w-auto min-w-[44px] justify-center"
+          v-tooltip.top="'更多下載選項'"
         />
 
-        <!-- 分別下載按鈕 -->
-        <div v-if="transcript.trim() || socialWorkerNotes.trim()" class="relative">
-          <Button
-            icon="pi pi-chevron-down"
-            severity="secondary"
-            outlined
-            @click="showDownloadMenu = !showDownloadMenu"
-            class="p-button-sm"
-          />
-
-          <!-- 下載選單 -->
-          <div
-            v-if="showDownloadMenu"
-            class="absolute right-0 top-full mt-1 bg-white border rounded-lg shadow-lg z-10 min-w-48"
-          >
-            <div class="py-1">
-              <button
-                v-if="transcript.trim()"
-                @click="downloadTranscript"
-                class="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2"
-              >
-                <i class="pi pi-file-text text-sm"></i>
-                下載逐字稿
-              </button>
-              <button
-                v-if="socialWorkerNotes.trim()"
-                @click="downloadNotes"
-                class="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2"
-              >
-                <i class="pi pi-pencil text-sm"></i>
-                下載補充說明
-              </button>
-              <button
-                v-if="transcript.trim() && socialWorkerNotes.trim()"
-                @click="downloadCombinedContent"
-                class="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2"
-              >
-                <i class="pi pi-download text-sm"></i>
-                下載完整內容
-              </button>
-            </div>
+        <div
+          v-if="showDownloadMenu"
+          class="absolute left-0 sm:right-0 top-full mt-1 bg-white border rounded-lg shadow-lg z-10 w-full sm:w-48 min-w-[200px]"
+        >
+          <div class="py-1">
+            <button
+              v-if="transcript.trim()"
+              @click="downloadTranscript"
+              class="w-full px-3 sm:px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 text-sm"
+            >
+              <i class="pi pi-file-text text-sm flex-shrink-0"></i>
+              <span class="truncate">下載逐字稿</span>
+            </button>
+            <button
+              v-if="socialWorkerNotes.trim()"
+              @click="downloadNotes"
+              class="w-full px-3 sm:px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 text-sm"
+            >
+              <i class="pi pi-pencil text-sm flex-shrink-0"></i>
+              <span class="truncate">下載補充說明</span>
+            </button>
+            <button
+              v-if="transcript.trim() && socialWorkerNotes.trim()"
+              @click="downloadCombinedContent"
+              class="w-full px-3 sm:px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 text-sm"
+            >
+              <i class="pi pi-download text-sm flex-shrink-0"></i>
+              <span class="truncate">下載完整內容</span>
+            </button>
           </div>
         </div>
-
-        <Button
-          label="下一步：記錄設定"
-          icon="pi pi-arrow-right"
-          @click="proceedToConfig"
-          :disabled="!canProceedToConfig"
-        />
       </div>
+
+      <Button
+        label="下一步"
+        icon="pi pi-arrow-right"
+        @click="proceedToConfig"
+        :disabled="!canProceedToConfig"
+        size="small"
+        class="w-full sm:w-auto text-sm justify-center font-medium sm:hidden"
+      />
+
+      <Button
+        label="下一步：記錄設定"
+        icon="pi pi-arrow-right"
+        @click="proceedToConfig"
+        :disabled="!canProceedToConfig"
+        size="small"
+        class="hidden sm:flex w-auto text-sm justify-center font-medium"
+      />
     </div>
   </div>
 </template>
@@ -425,5 +429,29 @@ document.addEventListener('click', handleClickOutside)
 .badge-counter {
   font-size: 0.75rem;
   font-weight: 500;
+}
+
+/* 確保按鈕在小螢幕上有適當的最小高度 */
+@media (max-width: 640px) {
+  :deep(.p-button) {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+  }
+
+  :deep(.p-button-label) {
+    font-size: 0.875rem;
+  }
+
+  :deep(.p-button-icon) {
+    font-size: 0.875rem;
+  }
+}
+
+/* 下拉選單位置調整 */
+@media (max-width: 640px) {
+  .absolute.left-0 {
+    left: 0;
+    right: 0;
+  }
 }
 </style>

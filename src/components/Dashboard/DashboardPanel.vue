@@ -237,7 +237,7 @@ const isTabDisabled = (tabIndex: number): boolean => {
   }
 }
 
-// 是否可以進入下一步
+// 是否可以進入處遇計畫設定
 const canProceedToNext = computed(() => {
   switch (activeTabIndex.value) {
     case 0: // 逐字稿 → 記錄設定

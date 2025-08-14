@@ -12,25 +12,33 @@
     <!-- 遮罩層 -->
     <div class="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
 
-    <div class="relative z-10 flex flex-col items-center justify-center h-full px-4">
-      <h1 class="text-3xl font-bold mb-2">社工專屬的訪視記錄助手</h1>
-      <p class="text-lg mb-6">支援錄音上傳與逐字稿產出，AI自動生成訪視記錄，效率再升級。</p>
+    <div
+      class="relative z-10 flex flex-col items-center justify-center h-full px-4 sm:px-6 lg:px-8"
+    >
+      <!-- 標題區域 - 手機版調整 -->
+      <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 px-2">社工專屬的訪視記錄助手</h1>
+      <p class="text-base sm:text-lg mb-6 px-2 max-w-2xl">
+        支援錄音上傳與逐字稿產出，AI自動生成訪視記錄，效率再升級。
+      </p>
 
       <!-- 錄音中的狀態顯示 -->
-      <div v-if="isRecording || isPaused" class="mb-4 p-4 bg-red-600 bg-opacity-80 rounded-lg">
+      <div
+        v-if="isRecording || isPaused"
+        class="mb-4 p-3 sm:p-4 bg-red-600 bg-opacity-80 rounded-lg w-full max-w-md"
+      >
         <div class="flex items-center justify-center gap-2 mb-2">
           <div
             class="w-3 h-3 rounded-full"
             :class="isPaused ? 'bg-yellow-300' : 'bg-red-300 animate-pulse'"
           ></div>
-          <span class="text-white font-medium">
+          <span class="text-white font-medium text-sm sm:text-base">
             {{ isPaused ? '錄音已暫停' : '錄音中...' }} {{ formatRecordingTime(recordingTime) }}
           </span>
         </div>
 
         <!-- 剩餘時間顯示 -->
         <div class="text-center mb-2">
-          <span class="text-white text-sm">
+          <span class="text-white text-xs sm:text-sm">
             剩餘時間: {{ formatRemainingTime(remainingTime) }}
           </span>
         </div>
@@ -38,7 +46,7 @@
         <!-- 時間限制警告 -->
         <div
           v-if="isNearTimeLimit"
-          class="text-center mb-3 text-yellow-300 text-sm flex items-center justify-center gap-1"
+          class="text-center mb-3 text-yellow-300 text-xs sm:text-sm flex items-center justify-center gap-1"
         >
           <i class="pi pi-exclamation-triangle"></i>
           <span>即將達到最大錄音時間 ({{ maxRecordingTimeMinutes }}分鐘)</span>
@@ -53,12 +61,13 @@
           ></div>
         </div>
 
-        <div class="flex gap-3 justify-center">
+        <!-- 錄音控制按鈕 - 手機版優化 -->
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
           <!-- 暫停/繼續按鈕 -->
           <button
             v-if="isRecording"
             @click="pauseRecording"
-            class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 font-medium flex items-center gap-2"
+            class="bg-yellow-500 text-white px-4 py-2 sm:py-2 rounded hover:bg-yellow-600 font-medium flex items-center justify-center gap-2 text-sm sm:text-base min-h-[44px]"
           >
             <i class="pi pi-pause"></i>
             暫停錄音
@@ -67,7 +76,7 @@
           <button
             v-if="isPaused"
             @click="resumeRecording"
-            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 font-medium flex items-center gap-2"
+            class="bg-green-500 text-white px-4 py-2 sm:py-2 rounded hover:bg-green-600 font-medium flex items-center justify-center gap-2 text-sm sm:text-base min-h-[44px]"
           >
             <i class="pi pi-play"></i>
             繼續錄音
@@ -76,7 +85,7 @@
           <!-- 停止錄音按鈕 -->
           <button
             @click="stopRecording"
-            class="bg-white text-red-600 px-4 py-2 rounded hover:bg-gray-100 font-medium flex items-center gap-2"
+            class="bg-white text-red-600 px-4 py-2 sm:py-2 rounded hover:bg-gray-100 font-medium flex items-center justify-center gap-2 text-sm sm:text-base min-h-[44px]"
           >
             <i class="pi pi-stop"></i>
             停止錄音
@@ -84,93 +93,99 @@
         </div>
       </div>
 
-      <!-- 按鈕區域 -->
-      <div class="space-x-4 flex" v-if="!isRecording && !isPaused">
-        <!-- 開始錄製按鈕 -->
-        <button
-          class="flex bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-          @click="startRecording"
-          :disabled="isProcessing || showingConfirm"
-        >
-          <img src="@/assets/voice.png" alt="record-icon" class="h-5 mr-1" />
-          開始錄製
-        </button>
+      <!-- 主要按鈕區域 - 手機版優化 -->
+      <div class="w-full max-w-md" v-if="!isRecording && !isPaused">
+        <!-- 手機版：垂直排列，桌面版：水平排列 -->
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:justify-center">
+          <!-- 開始錄製按鈕 -->
+          <button
+            class="flex items-center justify-center bg-red-600 text-white px-4 py-3 sm:py-2 rounded hover:bg-red-700 font-medium text-sm sm:text-base min-h-[48px] sm:min-h-[44px] transition-colors"
+            @click="startRecording"
+            :disabled="isProcessing || showingConfirm"
+          >
+            <img src="@/assets/voice.png" alt="record-icon" class="h-4 sm:h-5 mr-2" />
+            開始錄製
+          </button>
 
-        <!-- 上傳錄音檔按鈕 -->
-        <input
-          type="file"
-          accept="audio/*"
-          class="hidden"
-          ref="audioInput"
-          @change="handleAudioUpload"
-        />
-        <button
-          class="flex bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800"
-          @click="triggerAudioInput"
-          :disabled="isProcessing || showingConfirm"
-        >
-          <img src="@/assets/microphone.png" alt="upload-icon" class="h-5 mr-1" />
-          上傳錄音檔
-        </button>
+          <!-- 上傳錄音檔按鈕 -->
+          <input
+            type="file"
+            accept="audio/*"
+            class="hidden"
+            ref="audioInput"
+            @change="handleAudioUpload"
+          />
+          <button
+            class="flex items-center justify-center bg-purple-700 text-white px-4 py-3 sm:py-2 rounded hover:bg-purple-800 font-medium text-sm sm:text-base min-h-[48px] sm:min-h-[44px] transition-colors"
+            @click="triggerAudioInput"
+            :disabled="isProcessing || showingConfirm"
+          >
+            <img src="@/assets/microphone.png" alt="upload-icon" class="h-4 sm:h-5 mr-2" />
+            上傳錄音檔
+          </button>
 
-        <!-- 上傳逐字稿按鈕 -->
-        <input
-          type="file"
-          accept=".txt"
-          class="hidden"
-          ref="textInput"
-          @change="handleTranscriptUpload"
-        />
-        <button
-          class="flex bg-gray-50 text-purple-700 px-4 py-2 rounded border border-purple-700 hover:bg-gray-300"
-          @click="triggerTextInput"
-          :disabled="isProcessing || showingConfirm"
-        >
-          <img src="@/assets/document.png" alt="document-icon" class="h-5 mr-1" />
-          上傳逐字稿
-        </button>
+          <!-- 上傳逐字稿按鈕 -->
+          <input
+            type="file"
+            accept=".txt"
+            class="hidden"
+            ref="textInput"
+            @change="handleTranscriptUpload"
+          />
+          <button
+            class="flex items-center justify-center bg-gray-50 text-purple-700 px-4 py-3 sm:py-2 rounded border border-purple-700 hover:bg-gray-300 font-medium text-sm sm:text-base min-h-[48px] sm:min-h-[44px] transition-colors"
+            @click="triggerTextInput"
+            :disabled="isProcessing || showingConfirm"
+          >
+            <img src="@/assets/document.png" alt="document-icon" class="h-4 sm:h-5 mr-2" />
+            上傳逐字稿
+          </button>
+        </div>
       </div>
 
       <!-- 處理中的提示 -->
-      <div v-if="isProcessing" class="mt-4 text-yellow-300 flex items-center gap-2">
+      <div
+        v-if="isProcessing"
+        class="mt-4 text-yellow-300 flex items-center gap-2 text-sm sm:text-base"
+      >
         <i class="pi pi-spin pi-spinner"></i>
         <span>處理中...</span>
       </div>
 
       <!-- 錯誤提示 -->
-      <div v-if="errorMessage" class="mt-4 p-3 bg-red-500 bg-opacity-80 rounded-lg">
-        <div class="flex items-center gap-2 text-white">
+      <div v-if="errorMessage" class="mt-4 p-3 bg-red-500 bg-opacity-80 rounded-lg max-w-md w-full">
+        <div class="flex items-center gap-2 text-white text-sm sm:text-base">
           <i class="pi pi-exclamation-triangle"></i>
           <span v-html="errorMessage"></span>
         </div>
       </div>
     </div>
 
-    <!-- 🔑 自定義確認對話框 - 避免重複 -->
+    <!-- 自定義確認對話框 - 手機版優化 -->
     <div
       v-if="showingConfirm"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
     >
-      <div class="bg-white p-6 rounded-lg shadow-xl max-w-md mx-4">
+      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
         <div class="flex items-center gap-3 mb-4">
-          <i class="pi pi-exclamation-triangle text-orange-500 text-xl"></i>
-          <h3 class="text-lg font-semibold text-gray-800">{{ confirmData.header }}</h3>
+          <i class="pi pi-exclamation-triangle text-orange-500 text-lg sm:text-xl"></i>
+          <h3 class="text-base sm:text-lg font-semibold text-gray-800">{{ confirmData.header }}</h3>
         </div>
 
-        <div class="text-gray-600 mb-6 whitespace-pre-line leading-relaxed">
+        <div class="text-gray-600 mb-6 whitespace-pre-line leading-relaxed text-sm sm:text-base">
           {{ confirmData.message }}
         </div>
 
-        <div class="flex justify-end gap-3">
+        <div class="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
           <button
             @click="cancelConfirm"
-            class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+            class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors text-sm sm:text-base min-h-[44px] order-2 sm:order-1"
           >
             取消
           </button>
           <button
             @click="acceptConfirm"
-            class="px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded transition-colors"
+            class="px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded transition-colors text-sm sm:text-base min-h-[44px] order-1 sm:order-2"
           >
             確定清除
           </button>

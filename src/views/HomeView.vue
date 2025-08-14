@@ -1,4 +1,5 @@
 <!-- File: views/HomeVuew.vue -->
+
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- 主要內容區域 -->
@@ -11,32 +12,47 @@
       />
 
       <!-- Dashboard 區域 (當 hasUploaded 為 true 時顯示) -->
-      <div v-if="hasUploaded" class="container mx-auto px-4 py-8" :class="{ 'pt-0': hasUploaded }">
+      <div
+        v-if="hasUploaded"
+        class="container mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8"
+        :class="{ 'pt-0 sm:pt-0': hasUploaded }"
+      >
         <!-- 專案控制列 -->
-        <div class="flex justify-between items-center mb-6 bg-white rounded-lg shadow-sm p-4">
-          <div class="flex items-center gap-4">
-            <h2 class="text-xl font-semibold text-gray-800">
-              {{ projectName || '新專案' }}
-            </h2>
-            <Badge :value="currentStepLabel" severity="info" class="text-sm" />
-          </div>
+        <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
+          <!-- 手機版：垂直排列，桌面版：水平排列 -->
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
+            <!-- 專案資訊區域 -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 min-w-0">
+              <h2 class="text-lg sm:text-xl font-semibold text-gray-800 truncate">
+                {{ projectName || '新專案' }}
+              </h2>
+              <Badge
+                :value="currentStepLabel"
+                severity="info"
+                class="text-xs sm:text-sm self-start sm:self-center"
+              />
+            </div>
 
-          <div class="flex gap-3">
-            <Button
-              label="儲存專案"
-              icon="pi pi-save"
-              @click="handleSaveProject"
-              outlined
-              size="small"
-            />
-            <Button
-              label="取消專案"
-              icon="pi pi-times"
-              @click="handleCancelProject"
-              severity="secondary"
-              outlined
-              size="small"
-            />
+            <!-- 按鈕區域 -->
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+              <Button
+                label="儲存專案"
+                icon="pi pi-save"
+                @click="handleSaveProject"
+                outlined
+                size="small"
+                class="w-full sm:w-auto text-sm justify-center"
+              />
+              <Button
+                label="取消專案"
+                icon="pi pi-times"
+                @click="handleCancelProject"
+                severity="secondary"
+                outlined
+                size="small"
+                class="w-full sm:w-auto text-sm justify-center"
+              />
+            </div>
           </div>
         </div>
 
@@ -175,3 +191,25 @@ onMounted(() => {
   }
 })
 </script>
+
+<style scoped>
+/* 確保在小螢幕上按鈕文字不會太小 */
+@media (max-width: 640px) {
+  :deep(.p-button-label) {
+    font-size: 0.875rem;
+  }
+
+  /* 確保 Badge 在手機上不會太大 */
+  :deep(.p-badge) {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+/* 中等螢幕的微調 */
+@media (min-width: 641px) and (max-width: 1024px) {
+  :deep(.p-button-label) {
+    font-size: 0.875rem;
+  }
+}
+</style>

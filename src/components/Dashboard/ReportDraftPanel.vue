@@ -47,34 +47,69 @@
     </Card>
 
     <!-- 操作按鈕 -->
-    <div v-if="reportDraft" class="flex justify-between items-center pt-4 border-t">
-      <div class="text-sm text-gray-500">
-        <span v-if="canProceedToTreatment" class="text-green-600 flex items-center gap-1">
-          <i class="pi pi-check-circle"></i>
-          記錄初稿已完成，可以進入處遇計畫設定
+    <div
+      v-if="reportDraft"
+      class="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 border-t gap-3 sm:gap-0"
+    >
+      <div class="text-sm text-gray-500 order-2 sm:order-1">
+        <span
+          v-if="canProceedToTreatment"
+          class="text-green-600 flex items-center gap-1 justify-center sm:justify-start"
+        >
+          <i class="pi pi-check-circle text-xs sm:text-sm"></i>
+          <span class="text-xs sm:text-sm text-center sm:text-left">
+            記錄初稿已完成，可以進入處遇計畫設定
+          </span>
         </span>
       </div>
 
-      <div class="flex gap-3">
+      <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 order-1 sm:order-2">
+        <Button
+          label="下載"
+          icon="pi pi-download"
+          @click="downloadDraft"
+          severity="secondary"
+          outlined
+          size="small"
+          class="w-full sm:w-auto text-sm justify-center sm:hidden"
+        />
+
         <Button
           label="下載記錄初稿"
           icon="pi pi-download"
           @click="downloadDraft"
           severity="secondary"
           outlined
+          size="small"
+          class="hidden sm:flex w-auto text-sm justify-center"
         />
+
         <Button
           label="重新生成"
           icon="pi pi-refresh"
           @click="regenerateDraft"
           severity="secondary"
           outlined
+          size="small"
+          class="w-full sm:w-auto text-sm justify-center"
         />
+
+        <Button
+          label="下一步"
+          icon="pi pi-arrow-right"
+          @click="proceedToTreatment"
+          :disabled="!canProceedToTreatment"
+          size="small"
+          class="w-full sm:w-auto text-sm justify-center font-medium sm:hidden"
+        />
+
         <Button
           label="下一步：處遇計畫"
           icon="pi pi-arrow-right"
           @click="proceedToTreatment"
           :disabled="!canProceedToTreatment"
+          size="small"
+          class="hidden sm:flex w-auto text-sm justify-center font-medium"
         />
       </div>
     </div>
@@ -137,3 +172,28 @@ watch(
   { immediate: true }
 )
 </script>
+
+<style scoped>
+/* 確保按鈕在小螢幕上有適當的觸控區域 */
+@media (max-width: 640px) {
+  :deep(.p-button) {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+  }
+
+  :deep(.p-button-label) {
+    font-size: 0.875rem;
+  }
+
+  :deep(.p-button-icon) {
+    font-size: 0.875rem;
+  }
+}
+
+/* 狀態訊息的響應式調整 */
+@media (max-width: 640px) {
+  .text-green-600 span {
+    line-height: 1.4;
+  }
+}
+</style>

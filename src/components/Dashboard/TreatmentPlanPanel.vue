@@ -5,9 +5,9 @@
     <Card class="config-card">
       <template #title>
         <div class="flex items-center gap-2">
-          <i class="pi pi-target text-blue-600"></i>
-          處遇計畫設定
-          <p>(可選擇個案所需要的處遇方向)</p>
+          <i class="pi pi-target text-blue-600 text-sm sm:text-base"></i>
+          <span class="text-base sm:text-2xl">處遇計畫設定</span>
+          <p class="text-sm sm:text-lg text-gray-600">(可選擇個案所需要的處遇方向)</p>
         </div>
       </template>
       <template #content>
@@ -70,19 +70,42 @@
     </Card>
 
     <!-- 操作按鈕 -->
-    <div class="flex justify-between items-center pt-4 border-t">
-      <div class="text-sm text-gray-500">
-        <span v-if="treatmentValidation.isValid" class="text-green-600 flex items-center gap-1">
-          <i class="pi pi-check-circle"></i>
-          {{ treatmentValidation.message }}
+    <div
+      class="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 border-t gap-3 sm:gap-0"
+    >
+      <div class="text-sm text-gray-500 order-2 sm:order-1">
+        <span
+          v-if="treatmentValidation.isValid"
+          class="text-green-600 flex items-center gap-1 justify-center sm:justify-start"
+        >
+          <i class="pi pi-check-circle text-xs sm:text-sm"></i>
+          <span class="text-xs sm:text-sm text-center sm:text-left">
+            {{ treatmentValidation.message }}
+          </span>
         </span>
-        <span v-else class="text-orange-600 flex items-center gap-1">
-          <i class="pi pi-exclamation-triangle"></i>
-          {{ treatmentValidation.message }}
+        <span
+          v-else
+          class="text-orange-600 flex items-center gap-1 justify-center sm:justify-start"
+        >
+          <i class="pi pi-exclamation-triangle text-xs sm:text-sm"></i>
+          <span class="text-xs sm:text-sm text-center sm:text-left">
+            {{ treatmentValidation.message }}
+          </span>
         </span>
       </div>
 
-      <div class="flex gap-3">
+      <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 order-1 sm:order-2">
+        <Button
+          v-if="treatmentPlan"
+          label="下載"
+          icon="pi pi-download"
+          @click="downloadTreatmentPlan"
+          severity="secondary"
+          outlined
+          size="small"
+          class="w-full sm:w-auto text-sm justify-center sm:hidden"
+        />
+
         <Button
           v-if="treatmentPlan"
           label="下載處遇計畫"
@@ -90,13 +113,28 @@
           @click="downloadTreatmentPlan"
           severity="secondary"
           outlined
+          size="small"
+          class="hidden sm:flex w-auto text-sm justify-center"
         />
+
+        <Button
+          label="生成計畫"
+          icon="pi pi-magic-wand"
+          @click="generateTreatmentPlan"
+          :disabled="!treatmentValidation.isValid || treatmentStatus === 'generating'"
+          :loading="treatmentStatus === 'generating'"
+          size="small"
+          class="w-full sm:w-auto text-sm justify-center font-medium sm:hidden"
+        />
+
         <Button
           label="生成處遇計畫"
           icon="pi pi-magic-wand"
           @click="generateTreatmentPlan"
           :disabled="!treatmentValidation.isValid || treatmentStatus === 'generating'"
           :loading="treatmentStatus === 'generating'"
+          size="small"
+          class="hidden sm:flex w-auto text-sm justify-center font-medium"
         />
       </div>
     </div>
@@ -159,3 +197,41 @@ const downloadTreatmentPlan = () => {
   downloadTreatmentPlanFile()
 }
 </script>
+
+<style scoped>
+/* 確保按鈕在小螢幕上有適當的觸控區域 */
+@media (max-width: 640px) {
+  :deep(.p-button) {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+  }
+
+  :deep(.p-button-label) {
+    font-size: 0.875rem;
+  }
+
+  :deep(.p-button-icon) {
+    font-size: 0.875rem;
+  }
+
+  /* loading 狀態的圖標 */
+  :deep(.p-button-loading-icon) {
+    font-size: 0.875rem;
+  }
+}
+
+/* 狀態訊息的響應式調整 */
+@media (max-width: 640px) {
+  .text-green-600 span,
+  .text-orange-600 span {
+    line-height: 1.4;
+  }
+}
+
+/* 確保 loading 按鈕在手機上也有適當的間距 */
+@media (max-width: 640px) {
+  :deep(.p-button-loading .p-button-label) {
+    margin-left: 0.5rem;
+  }
+}
+</style>
