@@ -86,7 +86,16 @@ class PromptTemplateManager:
         full_prompt = base_template
         
         if additional_instructions:
-            full_prompt += "\n\n額外評估項目：" + "".join(additional_instructions)
+            aspects_text = "、".join(additional_instructions)
+            case_status_section = f"""三、個案狀況
+根據實際情況包含相關面向的評估，如{aspects_text}等。每個面向以段落形式陳述。"""
+            needs_section_number = "四"
+        else:
+            case_status_section = ""
+            needs_section_number = "三"
+        
+        full_prompt = base_template.replace('{case_status_section}', case_status_section)
+        full_prompt = full_prompt.replace('{needs_section_number}', needs_section_number)
         
         # 加入逐字稿和社工補充說明
         input_content = f"逐字稿內容：\n{transcript}"

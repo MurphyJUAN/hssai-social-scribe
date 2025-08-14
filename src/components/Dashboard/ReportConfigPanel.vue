@@ -271,7 +271,7 @@ const sectionDisplayNames: Record<string, string> = {
   main_issue: '主述議題',
   family_status: '家庭狀況',
   children_status: '子女狀況',
-  relationship_map: '人物關係圖',
+  relationship_map: '人物關係圖(未完成)',
   safety_assessment: '人身或安全狀況',
   case_needs_and_expectations: '個案需求與期待',
   family_function_assessment: '家庭功能評估',

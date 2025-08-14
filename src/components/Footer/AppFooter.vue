@@ -4,7 +4,13 @@
     <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
       <div class="flex flex-col items-center space-y-4 lg:flex-row lg:justify-between lg:space-y-0">
         <!-- left (原本的 right) -->
-        <div class="text-center text-sm text-gray-500 sm:flex sm:items-center">
+
+        <div class="text-left text-sm text-gray-500">
+          <div>
+            意見回饋：<a href="https://forms.gle/iAuaeUBrz5sx1UBz6" class="hover:underline"
+              >https://forms.gle/iAuaeUBrz5sx1UBz6</a
+            >
+          </div>
           <div>
             聯絡我們：<a href="mailto:aifr.general@gmail.com" class="hover:underline"
               >aifr.general@gmail.com</a

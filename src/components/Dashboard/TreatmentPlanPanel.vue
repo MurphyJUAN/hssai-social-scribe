@@ -6,8 +6,8 @@
       <template #title>
         <div class="flex items-center gap-2">
           <i class="pi pi-target text-blue-600"></i>
-          社工服務領域設定
-          <p>基於訪視記錄內容生成專業的社工處遇計畫（可複選，影響處遇計畫建議）</p>
+          處遇計畫設定
+          <p>(可選擇個案所需要的處遇方向)</p>
         </div>
       </template>
       <template #content>
@@ -23,6 +23,7 @@
                 v-model="treatmentConfig.selectedServiceDomains"
                 :value="domain.value"
                 :binary="false"
+                @click.stop
               />
               <label class="text-sm font-medium cursor-pointer">
                 {{ domain.name }}

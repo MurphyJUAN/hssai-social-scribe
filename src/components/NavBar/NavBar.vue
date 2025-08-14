@@ -16,7 +16,7 @@ const navbarLinks = [
   },
   {
     to: '/securityGuide',
-    name: '隱私性說明',
+    name: '隱私保護',
     children: []
   },
   {
