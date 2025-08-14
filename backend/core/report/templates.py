@@ -88,7 +88,7 @@ class PromptTemplateManager:
         if additional_instructions:
             aspects_text = "、\n".join(additional_instructions)
             case_status_section = f"""三、個案狀況
-根據個案實際情況包含以下相關面向的評估：\n{aspects_text}。每個面向需以段落形式陳述。"""
+根據個案實際情況包含以下相關面向的評估：\n{aspects_text}\n\n每個面向需以段落形式陳述。"""
             needs_section_number = "四"
         else:
             case_status_section = ""
