@@ -124,7 +124,7 @@
             上傳錄音檔
           </button>
 
-          <!-- 上傳逐字稿按鈕 -->
+          <!-- 上傳逐字稿按鈕 - 手機版優化 -->
           <input
             type="file"
             accept=".txt"
@@ -132,14 +132,32 @@
             ref="textInput"
             @change="handleTranscriptUpload"
           />
-          <button
-            class="flex items-center justify-center bg-gray-50 text-purple-700 px-4 py-3 sm:py-2 rounded border border-purple-700 hover:bg-gray-300 font-medium text-sm sm:text-base min-h-[48px] sm:min-h-[44px] transition-colors"
-            @click="triggerTextInput"
-            :disabled="isProcessing || showingConfirm"
-          >
-            <img src="@/assets/document.png" alt="document-icon" class="h-4 sm:h-5 mr-2" />
-            上傳逐字稿
-          </button>
+          <div class="relative w-full sm:w-auto">
+            <button
+              class="flex items-center justify-center bg-gray-50 text-purple-700 px-4 py-3 sm:py-2 rounded border border-purple-700 hover:bg-gray-300 font-medium text-sm sm:text-base min-h-[48px] sm:min-h-[44px] transition-colors w-full sm:w-auto"
+              @click="triggerTextInput"
+              :disabled="isProcessing || showingConfirm"
+            >
+              <img src="@/assets/document.png" alt="document-icon" class="h-4 sm:h-5 mr-2" />
+              上傳逐字稿
+            </button>
+
+            <!-- 範例標籤按鈕 - 響應式優化 -->
+            <button
+              class="absolute bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors z-10 flex items-center justify-center"
+              :class="{
+                // 手機版：較大的標籤，位置調整
+                '-top-1 -right-1 w-12 h-6 text-xs': true,
+                // 桌面版：較小的標籤
+                'sm:-top-2 sm:-right-2 sm:w-auto sm:h-auto sm:px-2 sm:py-1 sm:text-xs': true
+              }"
+              @click="loadExampleTranscript"
+              :disabled="isProcessing || showingConfirm"
+              v-tooltip.top="'載入範例逐字稿'"
+            >
+              <span class="font-medium">範例</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -657,6 +675,54 @@ const parseTranscriptContent = (content: string) => {
     hasSections: false
   }
 }
+
+const exampleTranscriptContent = ref('')
+const loadExampleData = async () => {
+  try {
+    // 方法二：如果你把 JSON 放在 assets 資料夾（需要 import）
+    const exampleData = await import('@/assets/example-transcript.json')
+    return exampleData.default.content || exampleData.default.transcript || ''
+  } catch (error) {
+    console.error('載入範例逐字稿失敗:', error)
+    // 備用的預設內容
+    return `=== 逐字稿內容 ===
+範例逐字稿內容載入失敗，請檢查 JSON 檔案是否存在。
+
+=== 社工補充說明 ===
+這是備用的範例內容。`
+  }
+}
+
+// 載入範例逐字稿的方法
+const loadExampleTranscript = async () => {
+  showCustomConfirm('upload-transcript', async () => {
+    try {
+      // 如果還沒載入過，就載入 JSON 檔案
+      if (!exampleTranscriptContent.value) {
+        const content = await loadExampleData()
+        exampleTranscriptContent.value = content
+      }
+
+      // 解析範例內容
+      const parsedContent = parseTranscriptContent(exampleTranscriptContent.value)
+
+      // 發送解析後的結果
+      emit('transcriptUploaded', {
+        transcript: parsedContent.transcript,
+        socialWorkerNotes: parsedContent.socialWorkerNotes
+      })
+
+      // 顯示成功訊息
+      errorMessage.value = `✅ 已載入範例逐字稿，您可以直接編輯修改內容`
+      setTimeout(() => {
+        errorMessage.value = ''
+      }, 3000)
+    } catch (error) {
+      console.error('載入範例逐字稿失敗:', error)
+      errorMessage.value = '載入範例逐字稿失敗，請稍後再試'
+    }
+  })
+}
 </script>
 
 <style scoped>
@@ -700,6 +766,27 @@ button:not(:disabled):hover {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+@media (max-width: 640px) {
+  .absolute button {
+    font-size: 10px;
+    min-width: 48px;
+    min-height: 24px;
+  }
+}
+
+/* 確保標籤在所有螢幕尺寸都有適當的觸控區域 */
+@media (max-width: 640px) {
+  .absolute button:active {
+    transform: scale(0.95);
+  }
+}
+
+/* 桌面版保持原樣 */
+@media (min-width: 641px) {
+  .absolute button {
+    padding: 0.25rem 0.5rem;
   }
 }
 </style>

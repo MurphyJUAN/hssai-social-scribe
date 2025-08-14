@@ -122,7 +122,7 @@
     <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
       <Button
         v-if="transcript.trim() || socialWorkerNotes.trim()"
-        label="下載內容"
+        label="下載完整內容"
         icon="pi pi-download"
         @click="downloadCombinedContent"
         severity="secondary"
