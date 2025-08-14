@@ -681,7 +681,7 @@ const loadExampleData = async () => {
   try {
     // 方法二：如果你把 JSON 放在 assets 資料夾（需要 import）
     const exampleData = await import('@/assets/example-transcript.json')
-    return exampleData.default.content || exampleData.default.transcript || ''
+    return exampleData.default.content || ''
   } catch (error) {
     console.error('載入範例逐字稿失敗:', error)
     // 備用的預設內容
