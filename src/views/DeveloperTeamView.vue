@@ -7,7 +7,7 @@
           <i class="pi pi-users mr-3 text-blue-600"></i>
           開發團隊
         </h1>
-        <p class="text-lg text-gray-600">AI 社工訪視記錄系統背後的開發團隊</p>
+        <p class="text-lg text-gray-600">社工紀錄輔助系統背後的開發團隊</p>
       </div>
 
       <div class="space-y-8">

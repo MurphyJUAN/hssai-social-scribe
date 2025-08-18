@@ -134,7 +134,7 @@ export const useProjectStore = defineStore('project', () => {
 
   // ==================== Computed ====================
   const canProceedToConfig = computed(() => {
-    return transcript.value.trim().length > 0
+    return transcript.value.trim().length > 0 || socialWorkerNotes.value.trim().length > 0
   })
 
   const canGenerateReport = computed(() => {

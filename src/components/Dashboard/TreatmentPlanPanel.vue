@@ -50,6 +50,12 @@
             生成中... {{ treatmentProgress }}%
           </div>
         </div>
+        <div
+          class="mt-2 text-sm text-orange-600 bg-orange-50 p-2 rounded border-l-4 border-orange-400"
+        >
+          <i class="pi pi-exclamation-triangle mr-2"></i>
+          (請注意，AI生成的結果可能會有錯誤或疏漏，請使用者仔細確認並自行增補。)
+        </div>
       </template>
       <template #content>
         <div class="space-y-4">

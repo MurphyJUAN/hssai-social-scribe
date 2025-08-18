@@ -9,6 +9,16 @@
         </div>
       </template>
       <template #content>
+        <!-- 轉換按鈕 (如果有音檔但沒有逐字稿) -->
+        <div v-if="audioUrl && !transcript.trim()" class="text-center mb-3">
+          <Button
+            label="開始轉換逐字稿"
+            icon="pi pi-play"
+            @click="startTranscription"
+            :loading="transcriptStatus === 'processing'"
+            class="bg-blue-500 hover:bg-blue-600"
+          />
+        </div>
         <AudioPlayer :src="audioUrl" :filename="audioFileName" />
       </template>
     </Card>
@@ -60,17 +70,6 @@
             <p class="text-xs text-gray-500">
               支援格式化的逐字稿文件（包含逐字稿內容和社工補充說明段落）
             </p>
-          </div>
-
-          <!-- 轉換按鈕 (如果有音檔但沒有逐字稿) -->
-          <div v-if="audioUrl && !transcript.trim()" class="text-center">
-            <Button
-              label="開始轉換逐字稿"
-              icon="pi pi-play"
-              @click="startTranscription"
-              :loading="transcriptStatus === 'processing'"
-              class="bg-blue-500 hover:bg-blue-600"
-            />
           </div>
         </div>
       </template>

@@ -6,7 +6,7 @@
     <!-- 背景圖層 -->
     <div
       class="absolute inset-0 z-0"
-      :style="`background-image: url(${bgUrl}); background-size: cover; background-position: center;`"
+      :style="`background-image: url(${bgUrl}); background-size: cover; background-position: center top;`"
     ></div>
 
     <!-- 遮罩層 -->
@@ -158,6 +158,24 @@
               <span class="font-medium">範例</span>
             </button>
           </div>
+        </div>
+
+        <!-- 資料備份提醒 -->
+        <div class="mt-4 px-2">
+          <p class="text-yellow-200 text-base flex items-center justify-center gap-2">
+            <i class="pi pi-info-circle"></i>
+            <span
+              >提醒：本系統不會備份使用者的輸入資料，亦不會用來訓練AI。但AI所生成的紀錄初稿僅作參考，使用者需以其社工專業再做評估修改。詳情可參考<a
+                href="/securityGuide"
+                class="text-blue-500 hover:text-blue-700 underline hover:no-underline transition-colors duration-200 cursor-pointer"
+                >「隱私保護」</a
+              >與<a
+                href="/sysStandard"
+                class="text-blue-500 hover:text-blue-700 underline hover:no-underline transition-colors duration-200 cursor-pointer"
+                >「系統規範」</a
+              >。</span
+            >
+          </p>
         </div>
       </div>
 

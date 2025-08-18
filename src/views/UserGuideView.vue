@@ -5,7 +5,7 @@
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-800 mb-4 flex items-center justify-center">
           <i class="pi pi-book mr-3 text-blue-600"></i>
-          AI 社工訪視記錄系統使用說明
+          社工紀錄輔助系統使用說明
         </h1>
         <p class="text-lg text-gray-600">專為社工設計的智能文書處理助手</p>
       </div>
@@ -39,7 +39,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="text-center p-4 bg-white rounded-lg shadow-sm">
               <i class="pi pi-upload text-3xl text-purple-600 mb-3 block"></i>
-              <div class="font-medium text-base">1. 上傳資料</div>
+              <div class="font-medium text-base">1. 直接錄音或上傳資料</div>
               <div class="text-sm text-gray-500 mt-1">錄音檔或文字</div>
             </div>
             <div class="text-center p-4 bg-white rounded-lg shadow-sm">
@@ -88,6 +88,14 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div class="text-center p-4 bg-green-50 rounded-lg">
+                <i class="pi pi-pencil text-green-600 text-3xl mb-3 block"></i>
+                <h4 class="font-semibold text-base text-green-700 mb-2">直接輸入</h4>
+                <p class="text-sm text-gray-600">
+                  經過對方同意在訪視過程直接錄音，<br />或是社工於訪視結束後自行錄下訪視內容
+                </p>
+              </div>
+
+              <div class="text-center p-4 bg-green-50 rounded-lg">
                 <i class="pi pi-microphone text-green-600 text-3xl mb-3 block"></i>
                 <h4 class="font-semibold text-base text-green-700 mb-2">錄音檔案</h4>
                 <p class="text-sm text-gray-600">
@@ -102,15 +110,6 @@
                 <p class="text-sm text-gray-600">
                   已整理的會談記錄<br />
                   支援 TXT 文字檔案
-                </p>
-              </div>
-
-              <div class="text-center p-4 bg-green-50 rounded-lg">
-                <i class="pi pi-pencil text-green-600 text-3xl mb-3 block"></i>
-                <h4 class="font-semibold text-base text-green-700 mb-2">直接輸入</h4>
-                <p class="text-sm text-gray-600">
-                  手寫筆記、會談重點<br />
-                  直接複製貼上到系統
                 </p>
               </div>
             </div>
@@ -140,7 +139,6 @@
               <div>
                 <h4 class="font-semibold text-base text-green-600 mb-3">💾 資料保護</h4>
                 <ul class="text-sm text-gray-700 space-y-2">
-                  <li>• 系統會自動儲存您的編輯</li>
                   <li>• 所有資料都在您的電腦上處理</li>
                   <li>• 建議先去除個人識別資訊</li>
                   <li>• 可以隨時匯出備份</li>
@@ -157,6 +155,12 @@
                 >3</span
               >
               <h3 class="font-bold text-xl text-green-700">AI 幫您生成專業的訪視記錄</h3>
+            </div>
+            <div
+              class="my-2 text-sm text-orange-600 bg-orange-50 p-2 rounded border-l-4 border-orange-400"
+            >
+              <i class="pi pi-exclamation-triangle"></i>
+              (請注意，AI生成的結果可能會有錯誤或疏漏，請使用者仔細確認並自行增補。)
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -189,7 +193,7 @@
                 class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-4"
                 >4</span
               >
-              <h3 class="font-bold text-xl text-green-700">視覺化人物關係</h3>
+              <h3 class="font-bold text-xl text-green-700">視覺化人物關係（進行中，待完成）</h3>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -221,38 +225,48 @@
               </p>
             </div>
           </div>
-        </div>
+          <!-- 處遇計畫建議 -->
+          <div class="mb-6 bg-white p-6 rounded-lg border border-green-200 shadow-sm">
+            <div class="flex items-center mb-4">
+              <span
+                class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-4"
+                >5</span
+              >
+              <h3 class="font-bold text-xl text-green-700">處遇計畫建議</h3>
+            </div>
 
-        <!-- 處遇計畫功能 -->
-        <div class="p-6 border-l-4 border-l-orange-500 bg-orange-50 rounded-r-lg shadow-sm">
-          <h2 class="text-2xl font-bold mb-4 text-orange-700 flex items-center">
-            <i class="pi pi-calendar mr-3"></i>處遇計畫建議
-          </h2>
+            <div
+              class="my-2 text-sm text-orange-600 bg-orange-50 p-2 rounded border-l-4 border-orange-400"
+            >
+              <i class="pi pi-exclamation-triangle"></i>
+              (請注意，AI生成的結果可能會有錯誤或疏漏，請使用者仔細確認並自行增補。)
+            </div>
 
-          <div class="bg-white p-6 rounded-lg border border-orange-200 shadow-sm">
-            <p class="text-base text-gray-700 mb-4">
-              根據前面的記錄內容，AI 會幫您生成專業的處遇計畫建議，包含：
-            </p>
+            <div class="bg-white p-6 rounded-lg border border-green-200 shadow-sm">
+              <p class="text-base text-gray-700 mb-4">
+                根據前面的記錄內容，AI 會幫您生成專業的處遇計畫建議，包含：
+              </p>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 class="font-semibold text-base text-orange-600 mb-3">📋 計畫內容</h3>
-                <ul class="text-sm text-gray-700 space-y-2">
-                  <li>• <strong>處遇目標：</strong>要達成什麼成果</li>
-                  <li>• <strong>處遇策略：</strong>用什麼方法介入</li>
-                  <li>• <strong>實施步驟：</strong>具體的行動計畫</li>
-                  <li>• <strong>預期成效：</strong>如何評估成果</li>
-                </ul>
-              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 class="font-semibold text-base text-green-600 mb-3">📋 計畫內容</h3>
+                  <ul class="text-sm text-gray-700 space-y-2">
+                    <li>• <strong>處遇目標：</strong>要達成什麼成果</li>
+                    <li>• <strong>處遇策略：</strong>用什麼方法介入</li>
+                    <li>• <strong>實施步驟：</strong>具體的行動計畫</li>
+                    <li>• <strong>預期成效：</strong>如何評估成果</li>
+                  </ul>
+                </div>
 
-              <div>
-                <h3 class="font-semibold text-base text-orange-600 mb-3">💡 智能特色</h3>
-                <ul class="text-sm text-gray-700 space-y-2">
-                  <li>• 自動分析案主需求</li>
-                  <li>• 考量現有資源狀況</li>
-                  <li>• 提供具體可行建議</li>
-                  <li>• 可以編輯調整內容</li>
-                </ul>
+                <div>
+                  <h3 class="font-semibold text-base text-green-600 mb-3">💡 智能特色</h3>
+                  <ul class="text-sm text-gray-700 space-y-2">
+                    <li>• 自動分析案主需求</li>
+                    <li>• 考量現有資源狀況</li>
+                    <li>• 提供具體可行建議</li>
+                    <li>• 可以編輯調整內容</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

@@ -4,6 +4,7 @@ import UserGuideView from '@/views/UserGuideView.vue'
 import SecurityGuideView from '@/views/SecurityGuideView.vue'
 import DeveloperTeamView from '@/views/DeveloperTeamView.vue'
 import MonitorView from '@/views/MonitorView.vue'
+import SystemStandardView from '@/views/SystemStandardView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,6 +32,12 @@ const router = createRouter({
       name: 'devTeam',
       alias: '/devTeam',
       component: DeveloperTeamView
+    },
+    {
+      path: '/sysStandard',
+      name: 'sysStandard',
+      alias: '/sysStandard',
+      component: SystemStandardView
     },
     {
       path: '/monitor',

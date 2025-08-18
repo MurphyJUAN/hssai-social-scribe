@@ -20,6 +20,11 @@ const navbarLinks = [
     children: []
   },
   {
+    to: '/sysStandard',
+    name: '系統規範',
+    children: []
+  },
+  {
     to: '/devTeam',
     name: '開發團隊',
     children: []
@@ -45,9 +50,7 @@ const closeMenu = (event: MouseEvent) => {
       <RouterLink to="/" class="flex items-center space-x-3">
         <!-- Insert logo here -->
         <!-- <img src="" class="h-8" alt="Logo" /> -->
-        <span class="self-center text-xl font-semibold whitespace-nowrap">
-          AI社工訪視紀錄系統
-        </span>
+        <span class="self-center text-xl font-semibold whitespace-nowrap"> 社工紀錄輔助系統 </span>
       </RouterLink>
       <!-- Hamburger Menu -->
       <div class="flex md:order-2 space-x-3 md:space-x-0">
