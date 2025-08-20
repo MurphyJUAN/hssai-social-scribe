@@ -92,11 +92,9 @@ class ApiLoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         """處理請求並記錄"""
         path = request.url.path
-
         
         if not self.should_log(path):
             return await call_next(request)
-        
         
         # 記錄開始時間
         start_time = time.time()
@@ -107,16 +105,14 @@ class ApiLoggingMiddleware(BaseHTTPMiddleware):
         method = request.method
         file_size = self.get_file_size(request)
         
-        # 嘗試獲取請求數據（非文件上傳）
+        # 嘗試獲取請求數據
         request_data = None
         if method == 'POST' and 'multipart/form-data' not in request.headers.get('content-type', ''):
             try:
-                # 對於 JSON 請求，嘗試解析
                 body = await request.body()
                 if body:
                     request_data = json.loads(body.decode())
             except Exception:
-                # 解析失敗就忽略
                 pass
         
         # 提取模型信息
@@ -125,6 +121,8 @@ class ApiLoggingMiddleware(BaseHTTPMiddleware):
         # 處理請求
         success = 'success'
         error_message = None
+        response = None
+        exception_to_raise = None
         
         try:
             response = await call_next(request)
@@ -137,13 +135,12 @@ class ApiLoggingMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             success = 'error'
             error_message = str(e)
-            # 重新拋出異常
-            raise
+            exception_to_raise = e  # 記住要拋出的異常
         
         # 計算處理時間
-        processing_time = int((time.time() - start_time) * 1000)  # 毫秒
+        processing_time = int((time.time() - start_time) * 1000)
         
-        # 異步記錄到數據庫
+        # 異步記錄到數據庫 - 無論成功或失敗都要記錄
         try:
             await self.log_to_database(
                 timestamp=datetime.fromtimestamp(time.time()),
@@ -160,6 +157,10 @@ class ApiLoggingMiddleware(BaseHTTPMiddleware):
             )
         except Exception as log_error:
             logger.error(f"記錄 API 使用失敗: {log_error}")
+        
+        # 如果有異常需要拋出，現在才拋出
+        if exception_to_raise:
+            raise exception_to_raise
         
         return response
     
