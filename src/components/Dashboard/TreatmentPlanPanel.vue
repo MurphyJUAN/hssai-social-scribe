@@ -54,7 +54,7 @@
           class="mt-2 text-sm text-orange-600 bg-orange-50 p-2 rounded border-l-4 border-orange-400"
         >
           <i class="pi pi-exclamation-triangle mr-2"></i>
-          (請注意，AI生成的結果可能會有錯誤或疏漏，請使用者仔細確認並自行增補。)
+          (請注意，AI生成的結果可能會有錯誤或疏漏，請仔細確認或視需求增補。社工最後仍應對其繳交的正式紀錄負擔完整的責任。)
         </div>
       </template>
       <template #content>

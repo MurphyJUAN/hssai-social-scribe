@@ -160,7 +160,7 @@
               class="my-2 text-sm text-orange-600 bg-orange-50 p-2 rounded border-l-4 border-orange-400"
             >
               <i class="pi pi-exclamation-triangle"></i>
-              (請注意，AI生成的結果可能會有錯誤或疏漏，請使用者仔細確認並自行增補。)
+              (請注意，AI生成的結果可能會有錯誤或疏漏，請仔細確認或視需求增補。社工最後仍應對其繳交的正式紀錄負擔完整的責任。)
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -239,7 +239,7 @@
               class="my-2 text-sm text-orange-600 bg-orange-50 p-2 rounded border-l-4 border-orange-400"
             >
               <i class="pi pi-exclamation-triangle"></i>
-              (請注意，AI生成的結果可能會有錯誤或疏漏，請使用者仔細確認並自行增補。)
+              (請注意，AI生成的結果可能會有錯誤或疏漏，請仔細確認或視需求增補。社工最後仍應對其繳交的正式紀錄負擔完整的責任。)
             </div>
 
             <div class="bg-white p-6 rounded-lg border border-green-200 shadow-sm">
