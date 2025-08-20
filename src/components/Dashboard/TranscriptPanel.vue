@@ -17,7 +17,19 @@
             @click="startTranscription"
             :loading="transcriptStatus === 'processing'"
             class="bg-blue-500 hover:bg-blue-600"
+            title="
+              由於錄音轉逐字稿需要較久的時間，容易因為網路頻寬而失敗。建議也可以先下載用其他軟體轉檔，再上傳逐字稿即可快速完成。
+            "
           />
+          <div
+            class="mt-2 text-sm text-yellow-600 bg-yellow-50 p-2 rounded border-l-4 border-yellow-400"
+          >
+            <i class="pi pi-exclamation-triangle mr-2"></i>
+            由於錄音轉逐字稿需要較久的時間，容易因為網路頻寬而失敗。建議也可以先下載用其他軟體轉檔(例如：<a
+              href="https://studio.yating.tw/intro/zh-TW/transkribera"
+              >雅婷逐字稿</a
+            >)，再上傳逐字稿即可快速完成。
+          </div>
         </div>
         <AudioPlayer :src="audioUrl" :filename="audioFileName" />
       </template>
@@ -104,7 +116,7 @@
             (1) 如果社工訪視過程不方便直接錄音，無法得到上面的逐字稿。社工可在此以第一人稱的方式對系統直接輸入對於訪視過程的親身觀察紀錄。
             (2) 如果社工訪視可以錄音也有逐字稿如上，社工可在此以專業的觀點對系統補充以上逐字稿內容不完整的地方，特別是當事人沒有說明或可能有誤導，但社工覺得需要修改的部分。
             (3)  如果社工訪視可以錄音也有逐字稿如上，但是社工訪視的對象並非真正的案主，例如案主可能是孩童、老人或其他不方便受訪的對象，社工可以在此對系統說明案主的身分與訪視者不同，要求在紀錄中改變稱謂。例如以下的對早療社工訪視的例句：
-            
+
             '這個逐字稿中，小孩的母親是被我訪問的對象，但是她的小孩才是我們真正的「案主」。請你用整理的時候以我們所討論的小孩作為「案主」，採訪者為「案主母親」的稱謂來生成訪視紀錄。小孩(也就是案主)其他的親戚的稱謂也比照辦理。'
             "
             :rows="8"
